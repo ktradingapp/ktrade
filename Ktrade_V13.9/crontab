@@ -1,0 +1,13 @@
+# KTrade backtest schedule (Linux server). Times are SERVER local time —
+# set your server TZ to America/New_York, or adjust these to map to ET.
+# The scheduler itself still gates on US trading days (skips weekends/holidays),
+# so the Mon-Fri (1-5) here is just a coarse pre-filter.
+#
+#   install:  crontab deploy/crontab
+#   edit app path below (/app) to your deploy directory.
+
+# Intraday backtest — 08:00 ET, before the open
+0 8 * * 1-5  cd /app && .venv/bin/python ktrade_scheduler.py --run-if-due intraday >> ktrade_scheduler.log 2>&1
+
+# Daily backtest — 18:00 ET, after the close
+0 18 * * 1-5 cd /app && .venv/bin/python ktrade_scheduler.py --run-if-due daily >> ktrade_scheduler.log 2>&1

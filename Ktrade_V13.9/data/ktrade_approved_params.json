@@ -1,0 +1,681 @@
+{
+  "NVDA": {
+    "MACD": {
+      "approved": true,
+      "params": {
+        "fast": 8,
+        "slow": 21,
+        "signal": 7
+      },
+      "sharpe": 1.162,
+      "win_rate": 46.9,
+      "max_dd": 45.59,
+      "total_return": 1757.88,
+      "wf_sharpe": 1.058,
+      "wf_winrate": 47.1,
+      "approved_at": "2026-06-18T20:43:38.799229"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 50,
+        "slow_span": 100
+      },
+      "sharpe": 1.047,
+      "win_rate": 50.0,
+      "max_dd": 33.54,
+      "total_return": 665.43,
+      "wf_sharpe": 0.842,
+      "wf_winrate": 62.2,
+      "approved_at": "2026-06-18T20:43:39.747394"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 30
+      },
+      "sharpe": 1.41,
+      "win_rate": 53.8,
+      "max_dd": 45.26,
+      "total_return": 6255.87,
+      "wf_sharpe": 1.136,
+      "wf_winrate": 53.4,
+      "approved_at": "2026-06-18T20:43:40.321411"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=0.26 wr=53.7%",
+      "checked_at": "2026-06-18T20:43:41.451476"
+    }
+  },
+  "AMD": {
+    "MACD": {
+      "approved": true,
+      "params": {
+        "fast": 12,
+        "slow": 21,
+        "signal": 9
+      },
+      "sharpe": 1.194,
+      "win_rate": 43.4,
+      "max_dd": 49.91,
+      "total_return": 4221.74,
+      "wf_sharpe": 1.297,
+      "wf_winrate": 42.0,
+      "approved_at": "2026-06-18T20:43:43.810907"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 50,
+        "slow_span": 100
+      },
+      "sharpe": 0.888,
+      "win_rate": 37.5,
+      "max_dd": 42.44,
+      "total_return": 912.54,
+      "wf_sharpe": 0.326,
+      "wf_winrate": 26.2,
+      "approved_at": "2026-06-18T20:43:44.338599"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 10
+      },
+      "sharpe": 1.14,
+      "win_rate": 46.2,
+      "max_dd": 49.54,
+      "total_return": 3663.02,
+      "wf_sharpe": 1.135,
+      "wf_winrate": 43.5,
+      "approved_at": "2026-06-18T20:43:44.837451"
+    },
+    "Conviction": {
+      "approved": true,
+      "params": {
+        "fast": 8,
+        "slow": 21,
+        "signal": 7,
+        "ema_span": 200
+      },
+      "sharpe": 0.432,
+      "win_rate": 48.4,
+      "max_dd": 39.77,
+      "total_return": 96.11,
+      "wf_sharpe": 0.641,
+      "wf_winrate": 48.1,
+      "approved_at": "2026-06-18T20:43:45.894673"
+    }
+  },
+  "MSFT": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.305 (need\u22650.3) wr=38.1% (need\u226520.0%) dd=42.71% (max=25.0%)",
+      "checked_at": "2026-06-18T20:43:47.794216"
+    },
+    "EMA": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.228 (need\u22650.3) wr=28.6% (need\u226520.0%) dd=33.33% (max=25.0%)",
+      "checked_at": "2026-06-18T20:43:48.050661"
+    },
+    "Momentum": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.876 (need\u22650.3) wr=52.0% (need\u226520.0%) dd=30.46% (max=25.0%)",
+      "checked_at": "2026-06-18T20:43:48.314424"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=-0.093 (need\u22650.3) wr=48.6% (need\u226520.0%) dd=36.05% (max=25.0%)",
+      "checked_at": "2026-06-18T20:43:49.086555"
+    }
+  },
+  "GOOGL": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.726 (need\u22650.3) wr=44.8% (need\u226520.0%) dd=38.44% (max=25.0%)",
+      "checked_at": "2026-06-18T20:43:50.833912"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 20,
+        "slow_span": 200
+      },
+      "sharpe": 0.921,
+      "win_rate": 68.4,
+      "max_dd": 15.08,
+      "total_return": 148.87,
+      "wf_sharpe": 0.65,
+      "wf_winrate": 65.0,
+      "approved_at": "2026-06-18T20:43:51.391216"
+    },
+    "Momentum": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.806 (need\u22650.3) wr=51.9% (need\u226520.0%) dd=56.41% (max=25.0%)",
+      "checked_at": "2026-06-18T20:43:51.699058"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.09 (need\u22650.3) wr=48.4% (need\u226520.0%) dd=36.14% (max=25.0%)",
+      "checked_at": "2026-06-18T20:43:52.555174"
+    }
+  },
+  "META": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.258 (need\u22650.3) wr=36.3% (need\u226520.0%) dd=73.46% (max=55.0%)",
+      "checked_at": "2026-06-18T20:43:54.310947"
+    },
+    "EMA": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=-0.07 wr=30.6%",
+      "checked_at": "2026-06-18T20:43:54.869463"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 30
+      },
+      "sharpe": 0.872,
+      "win_rate": 50.0,
+      "max_dd": 34.31,
+      "total_return": 455.56,
+      "wf_sharpe": 0.893,
+      "wf_winrate": 52.1,
+      "approved_at": "2026-06-18T20:43:55.393376"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=-0.463 (need\u22650.3) wr=37.7% (need\u226520.0%) dd=53.95% (max=55.0%)",
+      "checked_at": "2026-06-18T20:43:56.188836"
+    }
+  },
+  "AAPL": {
+    "MACD": {
+      "approved": true,
+      "params": {
+        "fast": 16,
+        "slow": 34,
+        "signal": 7
+      },
+      "sharpe": 1.339,
+      "win_rate": 50.5,
+      "max_dd": 23.0,
+      "total_return": 733.5,
+      "wf_sharpe": 1.367,
+      "wf_winrate": 51.3,
+      "approved_at": "2026-06-18T20:43:58.307048"
+    },
+    "EMA": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.649 (need\u22650.3) wr=50.0% (need\u226520.0%) dd=38.81% (max=25.0%)",
+      "checked_at": "2026-06-18T20:43:58.570966"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 10
+      },
+      "sharpe": 1.405,
+      "win_rate": 53.3,
+      "max_dd": 24.09,
+      "total_return": 857.36,
+      "wf_sharpe": 1.422,
+      "wf_winrate": 52.9,
+      "approved_at": "2026-06-18T20:43:59.084985"
+    },
+    "Conviction": {
+      "approved": true,
+      "params": {
+        "fast": 16,
+        "slow": 21,
+        "signal": 7,
+        "ema_span": 200
+      },
+      "sharpe": 0.593,
+      "win_rate": 52.2,
+      "max_dd": 13.78,
+      "total_return": 47.63,
+      "wf_sharpe": 0.661,
+      "wf_winrate": 53.0,
+      "approved_at": "2026-06-18T20:44:00.094897"
+    }
+  },
+  "TSLA": {
+    "MACD": {
+      "approved": true,
+      "params": {
+        "fast": 12,
+        "slow": 21,
+        "signal": 12
+      },
+      "sharpe": 1.291,
+      "win_rate": 40.4,
+      "max_dd": 48.95,
+      "total_return": 5581.91,
+      "wf_sharpe": 1.107,
+      "wf_winrate": 37.3,
+      "approved_at": "2026-06-18T20:44:02.072691"
+    },
+    "EMA": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=0.38 wr=31.4%",
+      "checked_at": "2026-06-18T20:44:02.709758"
+    },
+    "Momentum": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=1.091 (need\u22650.3) wr=35.7% (need\u226520.0%) dd=63.61% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:02.992050"
+    },
+    "Conviction": {
+      "approved": true,
+      "params": {
+        "fast": 16,
+        "slow": 26,
+        "signal": 7,
+        "ema_span": 200
+      },
+      "sharpe": 0.659,
+      "win_rate": 52.1,
+      "max_dd": 22.76,
+      "total_return": 165.09,
+      "wf_sharpe": 0.725,
+      "wf_winrate": 53.4,
+      "approved_at": "2026-06-18T20:44:04.134667"
+    }
+  },
+  "AMZN": {
+    "MACD": {
+      "approved": true,
+      "params": {
+        "fast": 8,
+        "slow": 21,
+        "signal": 9
+      },
+      "sharpe": 0.92,
+      "win_rate": 48.4,
+      "max_dd": 39.17,
+      "total_return": 439.28,
+      "wf_sharpe": 0.814,
+      "wf_winrate": 45.4,
+      "approved_at": "2026-06-18T20:44:06.417799"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 20,
+        "slow_span": 200
+      },
+      "sharpe": 0.791,
+      "win_rate": 64.7,
+      "max_dd": 21.98,
+      "total_return": 126.62,
+      "wf_sharpe": 1.046,
+      "wf_winrate": 60.8,
+      "approved_at": "2026-06-18T20:44:07.126863"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 30
+      },
+      "sharpe": 1.063,
+      "win_rate": 56.0,
+      "max_dd": 38.33,
+      "total_return": 644.85,
+      "wf_sharpe": 0.785,
+      "wf_winrate": 44.5,
+      "approved_at": "2026-06-18T20:44:07.836730"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=0.00 wr=50.3%",
+      "checked_at": "2026-06-18T20:44:09.140769"
+    }
+  },
+  "PLTR": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=1.109 (need\u22650.3) wr=42.0% (need\u226520.0%) dd=60.98% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:10.990785"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 50,
+        "slow_span": 100
+      },
+      "sharpe": 1.681,
+      "win_rate": 57.9,
+      "max_dd": 42.93,
+      "total_return": 2221.97,
+      "wf_sharpe": 1.434,
+      "wf_winrate": 50.4,
+      "approved_at": "2026-06-18T20:44:12.003703"
+    },
+    "Momentum": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=0.29 wr=38.9%",
+      "checked_at": "2026-06-18T20:44:12.546730"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=0.39 wr=41.7%",
+      "checked_at": "2026-06-18T20:44:13.623973"
+    }
+  },
+  "CRWD": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.731 (need\u22650.3) wr=41.3% (need\u226520.0%) dd=59.24% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:15.498719"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 50,
+        "slow_span": 100
+      },
+      "sharpe": 1.006,
+      "win_rate": 60.0,
+      "max_dd": 33.0,
+      "total_return": 231.62,
+      "wf_sharpe": 0.507,
+      "wf_winrate": 43.8,
+      "approved_at": "2026-06-18T20:44:16.306348"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 20
+      },
+      "sharpe": 1.162,
+      "win_rate": 58.3,
+      "max_dd": 49.62,
+      "total_return": 674.4,
+      "wf_sharpe": 0.949,
+      "wf_winrate": 52.1,
+      "approved_at": "2026-06-18T20:44:17.018431"
+    },
+    "Conviction": {
+      "approved": true,
+      "params": {
+        "fast": 16,
+        "slow": 26,
+        "signal": 7,
+        "ema_span": 200
+      },
+      "sharpe": 0.754,
+      "win_rate": 51.7,
+      "max_dd": 21.37,
+      "total_return": 95.99,
+      "wf_sharpe": 0.569,
+      "wf_winrate": 50.0,
+      "approved_at": "2026-06-18T20:44:18.096840"
+    }
+  },
+  "COIN": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.755 (need\u22650.3) wr=31.8% (need\u226520.0%) dd=67.52% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:19.910603"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 20,
+        "slow_span": 100
+      },
+      "sharpe": 1.265,
+      "win_rate": 68.8,
+      "max_dd": 23.55,
+      "total_return": 366.91,
+      "wf_sharpe": 1.193,
+      "wf_winrate": 64.8,
+      "approved_at": "2026-06-18T20:44:20.454048"
+    },
+    "Momentum": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.633 (need\u22650.3) wr=34.6% (need\u226520.0%) dd=58.96% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:20.737193"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.014 (need\u22650.3) wr=43.8% (need\u226520.0%) dd=36.96% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:22.676100"
+    }
+  },
+  "MU": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.801 (need\u22650.3) wr=37.9% (need\u226520.0%) dd=56.86% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:25.634607"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 20,
+        "slow_span": 100
+      },
+      "sharpe": 1.219,
+      "win_rate": 57.1,
+      "max_dd": 25.36,
+      "total_return": 792.81,
+      "wf_sharpe": 0.853,
+      "wf_winrate": 53.3,
+      "approved_at": "2026-06-18T20:44:26.191889"
+    },
+    "Momentum": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.841 (need\u22650.3) wr=41.9% (need\u226520.0%) dd=57.07% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:26.472970"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.33 (need\u22650.3) wr=47.2% (need\u226520.0%) dd=62.35% (max=55.0%)",
+      "checked_at": "2026-06-18T20:44:27.306420"
+    }
+  },
+  "ARM": {
+    "MACD": {
+      "approved": true,
+      "params": {
+        "fast": 12,
+        "slow": 21,
+        "signal": 7
+      },
+      "sharpe": 1.55,
+      "win_rate": 51.7,
+      "max_dd": 32.75,
+      "total_return": 434.28,
+      "wf_sharpe": 1.035,
+      "wf_winrate": 41.0,
+      "approved_at": "2026-06-18T20:44:29.615067"
+    },
+    "EMA": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=-0.11 wr=37.5%",
+      "checked_at": "2026-06-18T20:44:30.588995"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 20
+      },
+      "sharpe": 1.923,
+      "win_rate": 50.0,
+      "max_dd": 31.09,
+      "total_return": 878.28,
+      "wf_sharpe": 1.477,
+      "wf_winrate": 50.0,
+      "approved_at": "2026-06-18T20:44:31.492380"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=-0.22 wr=46.5%",
+      "checked_at": "2026-06-18T20:44:32.679285"
+    }
+  },
+  "QQQ": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.85 (need\u22650.3) wr=45.7% (need\u226520.0%) dd=30.94% (max=25.0%)",
+      "checked_at": "2026-06-18T20:44:34.428609"
+    },
+    "EMA": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=1.025 (need\u22650.3) wr=50.0% (need\u226520.0%) dd=29.05% (max=25.0%)",
+      "checked_at": "2026-06-18T20:44:34.703628"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 20
+      },
+      "sharpe": 1.163,
+      "win_rate": 62.2,
+      "max_dd": 23.72,
+      "total_return": 299.33,
+      "wf_sharpe": 1.26,
+      "wf_winrate": 56.5,
+      "approved_at": "2026-06-18T20:44:35.341527"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=-0.098 (need\u22650.3) wr=51.5% (need\u226520.0%) dd=17.8% (max=25.0%)",
+      "checked_at": "2026-06-18T20:44:36.160741"
+    }
+  },
+  "SPY": {
+    "MACD": {
+      "approved": true,
+      "params": {
+        "fast": 8,
+        "slow": 21,
+        "signal": 7
+      },
+      "sharpe": 0.69,
+      "win_rate": 45.8,
+      "max_dd": 20.59,
+      "total_return": 85.2,
+      "wf_sharpe": 0.913,
+      "wf_winrate": 50.2,
+      "approved_at": "2026-06-18T20:44:38.288451"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 50,
+        "slow_span": 100
+      },
+      "sharpe": 0.813,
+      "win_rate": 41.7,
+      "max_dd": 19.94,
+      "total_return": 81.47,
+      "wf_sharpe": 0.967,
+      "wf_winrate": 61.0,
+      "approved_at": "2026-06-18T20:44:38.889751"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 20
+      },
+      "sharpe": 0.943,
+      "win_rate": 54.8,
+      "max_dd": 16.22,
+      "total_return": 139.99,
+      "wf_sharpe": 1.113,
+      "wf_winrate": 53.1,
+      "approved_at": "2026-06-18T20:44:39.673879"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=-0.018 (need\u22650.3) wr=50.4% (need\u226520.0%) dd=9.75% (max=25.0%)",
+      "checked_at": "2026-06-18T20:44:41.263727"
+    }
+  },
+  "IONQ": {
+    "MACD": {
+      "approved": true,
+      "params": {
+        "fast": 16,
+        "slow": 34,
+        "signal": 9
+      },
+      "sharpe": 1.13,
+      "win_rate": 40.0,
+      "max_dd": 54.5,
+      "total_return": 951.48,
+      "wf_sharpe": 0.933,
+      "wf_winrate": 39.0,
+      "approved_at": "2026-06-18T20:44:43.877630"
+    },
+    "EMA": {
+      "approved": false,
+      "reason": "WF failed: Failed: sharpe=0.27 wr=35.8%",
+      "checked_at": "2026-06-18T20:44:44.849059"
+    },
+    "Momentum": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=1.018 (need\u22650.3) wr=38.5% (need\u226520.0%) dd=73.28% (max=65.0%)",
+      "checked_at": "2026-06-18T20:44:45.311503"
+    },
+    "Conviction": {
+      "approved": true,
+      "params": {
+        "fast": 16,
+        "slow": 26,
+        "signal": 9,
+        "ema_span": 200
+      },
+      "sharpe": 0.875,
+      "win_rate": 48.1,
+      "max_dd": 37.13,
+      "total_return": 225.9,
+      "wf_sharpe": 0.505,
+      "wf_winrate": 50.1,
+      "approved_at": "2026-06-18T20:44:46.544237"
+    }
+  },
+  "RKLB": {
+    "MACD": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=1.168 (need\u22650.3) wr=52.8% (need\u226520.0%) dd=66.39% (max=65.0%)",
+      "checked_at": "2026-06-18T20:44:48.550868"
+    },
+    "EMA": {
+      "approved": true,
+      "params": {
+        "fast_span": 50,
+        "slow_span": 100
+      },
+      "sharpe": 1.703,
+      "win_rate": 57.1,
+      "max_dd": 31.91,
+      "total_return": 2626.6,
+      "wf_sharpe": 1.185,
+      "wf_winrate": 38.9,
+      "approved_at": "2026-06-18T20:44:49.106079"
+    },
+    "Momentum": {
+      "approved": true,
+      "params": {
+        "period": 20
+      },
+      "sharpe": 1.405,
+      "win_rate": 61.1,
+      "max_dd": 48.49,
+      "total_return": 1951.47,
+      "wf_sharpe": 1.594,
+      "wf_winrate": 70.0,
+      "approved_at": "2026-06-18T20:44:49.673833"
+    },
+    "Conviction": {
+      "approved": false,
+      "reason": "In-sample failed: sharpe=0.224 (need\u22650.3) wr=38.0% (need\u226520.0%) dd=61.46% (max=65.0%)",
+      "checked_at": "2026-06-18T20:44:50.525925"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+﻿KTrade v10.3 - Commands
+=======================
+
+Project folder:
+C:\trading-agent\Ktrade_v10_3
+
+1) First-time setup if .venv is missing:
+cd /d C:\trading-agent\Ktrade_v10_3
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+2) Start backend/dashboard server:
+cd /d C:\trading-agent\Ktrade_v10_3
+.venv\Scripts\python.exe backend\ktrade_alpaca.py
+
+Open browser:
+http://localhost:5001
+
+3) Run daily scanner:
+cd /d C:\trading-agent\Ktrade_v10_3
+set KTRADE_DATA_PROVIDER=yfinance
+set KTRADE_SCAN_SYMBOLS=
+set KTRADE_SCAN_UNIVERSE=extended
+set KTRADE_SCAN_INTERVAL=1d
+.venv\Scripts\python.exe agent\ktrade_agent_v9.py --score-only
+
+4) Run intraday scanner:
+cd /d C:\trading-agent\Ktrade_v10_3
+set KTRADE_DATA_PROVIDER=yfinance
+set KTRADE_SCAN_SYMBOLS=
+set KTRADE_SCAN_UNIVERSE=extended
+set KTRADE_SCAN_INTERVAL=5m
+.venv\Scripts\python.exe agent\ktrade_agent_v9.py --score-only
+
+5) Run tests:
+cd /d C:\trading-agent\Ktrade_v10_3
+.venv\Scripts\python.exe test_v103_fixes.py
+.venv\Scripts\python.exe data\test_price_sanity.py
+
+Easy double-click files:
+START_BACKEND.cmd
+RUN_SCANNER_DAILY.cmd
+RUN_SCANNER_INTRADAY.cmd
+RUN_VECTORBT.cmd
+RUN_INTRADAY_VECTORBT.cmd
+RUN_TESTS.cmd

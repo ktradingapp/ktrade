@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KTrade — Command</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;500;600;700;800&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lapis:#131036;          /* lapis-lazuli ground (the page / night sky) */
+    --lapis-2:#1A1550;        /* raised panel */
+    --lapis-3:#241D63;        /* hover / inset */
+    --ink:#0D0A28;            /* deepest shadow */
+    --gold:#E8B53A;           /* gold leaf — rules, headers, the wordmark */
+    --gold-soft:#A98A3E;      /* dimmed gold for fine rules */
+    --peacock:#16B89C;        /* gain / go */
+    --sindoor:#E84656;        /* loss / danger / kill */
+    --marigold:#F5901E;       /* pending / warning */
+    --rose:#E0539B;           /* tertiary highlight, used rarely */
+    --ivory:#F1E6CC;          /* primary text — old paper */
+    --ivory-dim:#B9AE92;      /* secondary text */
+    --ivory-faint:#7C7569;    /* captions */
+    --line:rgba(232,181,58,.22);
+    --line-soft:rgba(232,181,58,.12);
+    --radius:14px;
+    --mono:"Spline Sans Mono",ui-monospace,monospace;
+    --sans:"Mukta",system-ui,sans-serif;
+    --display:"Rozha One",Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:var(--sans);
+    color:var(--ivory);
+    background:
+      radial-gradient(1200px 700px at 78% -10%, rgba(224,83,155,.10), transparent 60%),
+      radial-gradient(1000px 800px at -8% 110%, rgba(22,184,156,.10), transparent 55%),
+      var(--lapis);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.45;
+  }
+  /* jali lattice watermark — barely-there octagonal screen, the texture of carved stone */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.05;
+    background-image:
+      linear-gradient(45deg, var(--gold) 1px, transparent 1px),
+      linear-gradient(-45deg, var(--gold) 1px, transparent 1px);
+    background-size:34px 34px;
+    mask-image:radial-gradient(circle at 50% 38%, #000 30%, transparent 80%);
+  }
+  .wrap{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:22px clamp(16px,3vw,34px) 60px}
+
+  a{color:inherit}
+  ::selection{background:rgba(232,181,58,.3);color:#fff}
+
+  /* ---- toran / top bar ---- */
+  .toran{
+    display:flex;align-items:center;gap:18px;
+    padding:14px 20px;margin-bottom:22px;
+    background:linear-gradient(180deg, rgba(36,29,99,.7), rgba(26,21,80,.55));
+    border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 18px 40px -28px #000;
+    position:relative;
+  }
+  .toran::after{ /* hanging gold rule, like a toran thread */
+    content:"";position:absolute;left:16px;right:16px;bottom:-1px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold-soft),transparent);
+  }
+  .brand{display:flex;align-items:center;gap:14px;margin-right:auto}
+  .chakra{width:42px;height:42px;flex:none;filter:drop-shadow(0 0 10px rgba(232,181,58,.25))}
+  .chakra .spin{transform-origin:50% 50%;animation:turn 9s linear infinite;animation-play-state:paused}
+  .live .chakra .spin{animation-play-state:running}
+  .live .chakra{filter:drop-shadow(0 0 14px rgba(22,184,156,.55))}
+  @keyframes turn{to{transform:rotate(360deg)}}
+  .wordmark{font-family:var(--display);font-size:30px;letter-spacing:.5px;line-height:1;color:var(--gold)}
+  .wordmark b{color:var(--ivory);font-weight:400}
+  .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--ivory-faint);margin-top:4px}
+
+  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    padding:7px 12px;border-radius:999px;border:1px solid var(--line);color:var(--ivory-dim);white-space:nowrap}
+  .chip .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ivory-faint);margin-right:7px;vertical-align:1px}
+  .chip.live{color:var(--peacock);border-color:rgba(22,184,156,.4)}
+  .chip.live .dot{background:var(--peacock);box-shadow:0 0 8px var(--peacock)}
+  .chip.paper{color:var(--marigold);border-color:rgba(245,144,30,.4)}
+  .chip.strat{color:var(--gold);border-color:var(--line)}
+
+  .kill{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+    padding:10px 16px;border-radius:10px;cursor:pointer;color:#fff;
+    background:linear-gradient(180deg,#F0566A,#C9303F);border:1px solid #F4818C;
+    box-shadow:0 10px 24px -12px rgba(232,70,86,.7), inset 0 1px 0 rgba(255,255,255,.25);
+    transition:transform .12s ease, filter .12s ease}
+  .kill:hover{filter:brightness(1.08)}
+  .kill:active{transform:translateY(1px)}
+
+  /* ---- hero cartouches ---- */
+  .hero{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+  .cart{position:relative;padding:18px 20px;border-radius:var(--radius);
+    background:linear-gradient(180deg, var(--lapis-2), rgba(19,16,54,.6));
+    border:1px solid var(--line-soft);overflow:hidden}
+  .cart::before{ /* gold corner illumination */
+    content:"";position:absolute;inset:0;border-radius:var(--radius);padding:1px;
+    background:linear-gradient(135deg,var(--gold),transparent 40%,transparent 60%,var(--gold-soft));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;opacity:.5;pointer-events:none}
+  .cart .k{font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--ivory-faint)}
+  .cart .v{font-family:var(--display);font-size:30px;line-height:1.05;margin-top:8px;color:var(--ivory)}
+  .cart.equity .v{font-size:42px;color:var(--gold);text-shadow:0 0 26px rgba(232,181,58,.22)}
+  .cart .sub{font-family:var(--mono);font-size:11px;margin-top:5px;color:var(--ivory-dim)}
+  .up{color:var(--peacock)} .down{color:var(--sindoor)} .warn{color:var(--marigold)}
+
+  /* ---- folio panels (the signature: double gold rule + corner diamonds) ---- */
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:14px}
+  .panel{position:relative;background:linear-gradient(180deg,var(--lapis-2),rgba(19,16,54,.55));
+    border:1px solid var(--line);border-radius:var(--radius);padding:6px}
+  .folio{border:1px solid var(--line-soft);border-radius:9px;padding:18px 18px 6px;position:relative}
+  .corner{position:absolute;width:7px;height:7px;background:var(--gold);transform:rotate(45deg);opacity:.65}
+  .corner.tl{top:-4px;left:-4px}.corner.tr{top:-4px;right:-4px}
+  .corner.bl{bottom:-4px;left:-4px}.corner.br{bottom:-4px;right:-4px}
+  .ptitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow::before{content:"❖";margin-right:9px;color:var(--gold-soft);font-size:10px}
+  .note{font-family:var(--mono);font-size:10.5px;color:var(--ivory-faint)}
+
+  table{width:100%;border-collapse:collapse}
+  thead th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ivory-faint);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line-soft);font-weight:500}
+  thead th:first-child{text-align:left}
+  tbody td{padding:12px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--mono);font-size:13px}
+  tbody td:first-child{text-align:left}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:rgba(36,29,99,.45)}
+  .sym{font-family:var(--sans);font-weight:700;font-size:14px;letter-spacing:.3px;color:var(--ivory)}
+  .muted{color:var(--ivory-dim)}
+  .empty{padding:30px 10px;text-align:center;color:var(--ivory-faint);font-family:var(--mono);font-size:12px}
+
+  /* ---- auto controls ---- */
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .btn{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+    padding:11px 16px;border-radius:10px;cursor:pointer;border:1px solid var(--line);
+    background:var(--lapis-3);color:var(--ivory);transition:transform .12s ease,filter .12s ease,background .12s ease}
+  .btn:hover{filter:brightness(1.12)} .btn:active{transform:translateY(1px)}
+  .btn.go{background:linear-gradient(180deg,#1FCBA9,#0E9079);border-color:#43d9bd;color:#062a23}
+  .btn.stop{background:transparent;border-color:rgba(232,70,86,.5);color:#F2909A}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* ---- scan list (conviction folios) ---- */
+  .scanrow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;
+    padding:12px 4px;border-bottom:1px solid rgba(255,255,255,.04)}
+  .scanrow:last-child{border-bottom:none}
+  .rank{font-family:var(--mono);font-size:11px;color:var(--ivory-faint);width:20px}
+  .scan-sym{font-family:var(--sans);font-weight:700;letter-spacing:.3px}
+  .scan-act{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+    padding:3px 8px;border-radius:6px;margin-left:8px;border:1px solid currentColor}
+  .meter{height:7px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden;position:relative}
+  .meter > i{display:block;height:100%;border-radius:5px;
+    background:linear-gradient(90deg,var(--marigold),var(--gold))}
+  .conv{font-family:var(--mono);font-size:13px;color:var(--ivory);min-width:34px;text-align:right}
+
+  /* ---- bottom row ---- */
+  .row2{display:grid;grid-template-columns:1fr 1.6fr;gap:14px;margin-top:14px}
+  .stat{display:flex;justify-content:space-between;align-items:baseline;padding:11px 2px;border-bottom:1px solid rgba(255,255,255,.04)}
+  .stat:last-child{border-bottom:none}
+  .stat .l{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ivory-dim)}
+  .stat .n{font-family:var(--mono);font-size:14px;color:var(--ivory)}
+  .winbar{height:8px;border-radius:5px;background:var(--sindoor);overflow:hidden;margin-top:6px}
+  .winbar > i{display:block;height:100%;background:var(--peacock)}
+
+  .side-buy{color:var(--peacock);border-color:rgba(22,184,156,.45)!important}
+  .side-sell{color:var(--sindoor);border-color:rgba(232,70,86,.45)!important}
+
+  .foot{margin-top:26px;text-align:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--ivory-faint)}
+  .foot b{color:var(--gold-soft);font-weight:500}
+  .demo-flag{display:none;color:var(--marigold)}
+  .is-demo .demo-flag{display:inline}
+
+  @media (max-width:1080px){
+    .hero{grid-template-columns:1fr 1fr 1fr}
+    .grid,.row2{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .hero{grid-template-columns:1fr 1fr}
+    .wordmark{font-size:25px}.cart.equity .v{font-size:34px}
+    .toran{flex-wrap:wrap}
+  }
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+  @media (prefers-reduced-motion:reduce){ .chakra .spin{animation:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+  <!-- ░░ toran / command bar ░░ -->
+  <header class="toran">
+    <div class="brand">
+      <svg class="chakra" viewBox="0 0 100 100" aria-hidden="true">
+        <g class="spin" fill="none" stroke="var(--gold)" stroke-width="2.4">
+          <circle cx="50" cy="50" r="44"/>
+          <circle cx="50" cy="50" r="9" fill="var(--gold)" stroke="none"/>
+          <g id="spokes"></g>
+        </g>
+      </svg>
+      <div>
+        <div class="wordmark">K<b>·</b>Trade</div>
+        <div class="tag">Autonomous Trading Engine</div>
+      </div>
+    </div>
+    <div class="chip strat" id="chip-strat"><span class="dot"></span>Momentum · Bull</div>
+    <div class="chip paper" id="chip-mode">Paper</div>
+    <div class="chip" id="chip-status"><span class="dot"></span>Idle</div>
+    <button id="b-token" class="chip" title="Set the KTrade admin token used for Start / Stop / Kill" style="cursor:pointer;font-family:var(--mono);background:rgba(255,255,255,.02)">⚿ Token</button>
+    <button class="kill" id="kill" title="Emergency kill — disable agent, cancel orders, optional flatten">Kill Switch</button>
+  </header>
+
+  <!-- ░░ hero cartouches ░░ -->
+  <section class="hero">
+    <div class="cart equity"><div class="k">Net Equity</div><div class="v" id="m-eq">$100,000</div><div class="sub" id="m-bp">Buying power $100,000</div></div>
+    <div class="cart"><div class="k">Day P&amp;L</div><div class="v" id="m-pnl">+$0</div><div class="sub" id="m-pnlpct">+0.00% today</div></div>
+    <div class="cart"><div class="k">Open Risk</div><div class="v" id="m-risk">0%</div><div class="sub">of equity at stop</div></div>
+    <div class="cart"><div class="k">Positions</div><div class="v" id="m-pos">0</div><div class="sub" id="m-poscap">of 15 max</div></div>
+    <div class="cart"><div class="k">Universe</div><div class="v" id="m-uni">66</div><div class="sub">scanned today</div></div>
+  </section>
+
+  <!-- ░░ main grid ░░ -->
+  <div class="grid">
+    <!-- positions + controls -->
+    <section class="panel"><div class="folio">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <div class="ptitle"><span class="eyebrow">Open Positions</span><span class="note" id="recon">broker reconciled</span></div>
+      <div id="positions"></div>
+
+      <div class="ptitle" style="margin-top:22px"><span class="eyebrow">Agent Control</span><span class="note">paper order routing</span></div>
+      <div class="controls">
+        <button class="btn go"   id="b-start">Start Agent</button>
+        <button class="btn stop" id="b-stop" disabled>Stop Agent</button>
+        <button class="btn"      id="b-once">Run One Cycle</button>
+      </div>
+    </div></section>
+
+    <!-- latest scan -->
+    <section class="panel"><div class="folio">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <div class="ptitle"><span class="eyebrow">Latest Scan</span><span class="note">conviction ranked</span></div>
+      <div id="scan"></div>
+    </div></section>
+  </div>
+
+  <!-- ░░ performance + journal ░░ -->
+  <div class="row2">
+    <section class="panel"><div class="folio">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <div class="ptitle"><span class="eyebrow">Performance</span></div>
+      <div class="stat"><span class="l">Record</span><span class="n" id="p-rec">0 W · 0 L</span></div>
+      <div class="winbar"><i id="p-winbar" style="width:50%"></i></div>
+      <div class="stat" style="margin-top:8px"><span class="l">Win rate</span><span class="n" id="p-win">—</span></div>
+      <div class="stat"><span class="l">Avg win</span><span class="n up" id="p-aw">—</span></div>
+      <div class="stat"><span class="l">Avg loss</span><span class="n down" id="p-al">—</span></div>
+      <div class="stat"><span class="l">Realized P&amp;L</span><span class="n" id="p-real">—</span></div>
+    </div></section>
+
+    <section class="panel"><div class="folio">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <div class="ptitle"><span class="eyebrow">Trade Journal</span><span class="note">verified fills</span></div>
+      <table>
+        <thead><tr><th>Time</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Price</th><th>P&amp;L</th></tr></thead>
+        <tbody id="journal"></tbody>
+      </table>
+    </div></section>
+  </div>
+
+  <div class="foot">KTrade <b>v13.9</b> · iT LLC <span class="demo-flag">· showing sample data — backend not reached</span></div>
+</div>
+
+<script>
+"use strict";
+const API = "";  // relative → served by the Flask backend at /. Set to "http://localhost:5001" for cross-origin dev.
+
+/* ---- spokes for the chakra (24, the traditional count) ---- */
+(()=>{const g=document.getElementById("spokes");let s="";for(let i=0;i<24;i++){const a=i*15*Math.PI/180;
+  s+=`<line x1="${50+9*Math.cos(a)}" y1="${50+9*Math.sin(a)}" x2="${50+42*Math.cos(a)}" y2="${50+42*Math.sin(a)}"/>`;}
+  g.innerHTML=s;})();
+
+/* ---- formatting ---- */
+const money=n=>(n<0?"-$":"$")+Math.abs(n).toLocaleString("en-US",{maximumFractionDigits:0});
+const money2=n=>(n<0?"-$":"$")+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const signed=n=>(n>=0?"+":"−")+"$"+Math.abs(n).toLocaleString("en-US",{maximumFractionDigits:0});
+const cls=n=>n>0?"up":n<0?"down":"";
+
+/* ---- sample data so the folio is alive even before the backend answers ---- */
+const DEMO={
+  account:{equity:104820,buying_power:71240,day_pnl:1840,day_pnl_pct:1.79},
+  positions:[
+    {ticker:"NVDA",qty:18,avg:118.4,price:124.9,pnl:117.0},
+    {ticker:"MSFT",qty:9,avg:441.2,price:447.8,pnl:59.4},
+    {ticker:"AVGO",qty:6,avg:172.5,price:169.1,pnl:-20.4},
+  ],
+  risk:5.4, posCap:15, universe:66,
+  scan:[
+    {ticker:"SNDK",action:"BUY",conv:96},{ticker:"MU",action:"BUY",conv:91},
+    {ticker:"VRT",action:"BUY",conv:88},{ticker:"UCTT",action:"WATCH",conv:74},
+    {ticker:"INTC",action:"WATCH",conv:69},{ticker:"MRVL",action:"WATCH",conv:63},
+  ],
+  perf:{w:14,l:9,avgWin:62.4,avgLoss:-38.1,real:524.6},
+  journal:[
+    {t:"13:58",sym:"MU",side:"buy",qty:12,px:96.20,pnl:null},
+    {t:"11:42",sym:"AMD",side:"sell",qty:8,px:142.05,pnl:41.6},
+    {t:"10:51",sym:"GEV",side:"sell",qty:5,px:331.40,pnl:-22.0},
+  ],
+};
+
+let running=false, demoMode=false;
+const $=id=>document.getElementById(id);
+
+function renderHero(a, risk, posCount, posCap, uni){
+  $("m-eq").textContent=money(a.equity);
+  $("m-bp").textContent="Buying power "+money(a.buying_power);
+  const p=a.day_pnl||0; const pe=$("m-pnl"); pe.textContent=signed(p); pe.className="v "+cls(p);
+  const pp=$("m-pnlpct"); pp.textContent=(p>=0?"+":"−")+Math.abs(a.day_pnl_pct||0).toFixed(2)+"% today"; pp.className="sub "+cls(p);
+  const r=$("m-risk"); r.textContent=(risk||0).toFixed(1)+"%"; r.className="v "+(risk>8?"down":risk>4?"warn":"");
+  $("m-pos").textContent=posCount;
+  $("m-poscap").textContent="of "+posCap+" max";
+  $("m-uni").textContent=uni;
+}
+
+function renderPositions(rows){
+  const host=$("positions");
+  if(!rows||!rows.length){host.innerHTML='<div class="empty">No open positions — the agent is flat.</div>';return;}
+  let h='<table><thead><tr><th>Symbol</th><th>Qty</th><th>Avg</th><th>Last</th><th>P&L</th></tr></thead><tbody>';
+  for(const p of rows){
+    const pnl=p.pnl||0;
+    h+=`<tr><td><span class="sym">${p.ticker}</span></td><td class="muted">${p.qty}</td>
+      <td class="muted">${money2(p.avg||0)}</td><td>${money2(p.price||0)}</td>
+      <td class="${cls(pnl)}">${signed(pnl)}</td></tr>`;
+  }
+  host.innerHTML=h+'</tbody></table>';
+}
+
+function renderScan(rows){
+  const host=$("scan");
+  if(!rows||!rows.length){host.innerHTML='<div class="empty">No scan yet — run a cycle.</div>';return;}
+  const max=Math.max(...rows.map(r=>r.conv),100);
+  host.innerHTML=rows.map((r,i)=>{
+    const buy=(r.action||"").toUpperCase()==="BUY";
+    const actCls=buy?"side-buy":"";
+    return `<div class="scanrow"><span class="rank">${String(i+1).padStart(2,"0")}</span>
+      <div><span class="scan-sym">${r.ticker}</span><span class="scan-act ${actCls}">${r.action}</span>
+        <div class="meter" style="margin-top:7px"><i style="width:${Math.round(r.conv/max*100)}%"></i></div></div>
+      <span class="conv">${r.conv}</span></div>`;
+  }).join("");
+}
+
+function renderPerf(p){
+  const tot=p.w+p.l;
+  $("p-rec").textContent=`${p.w} W · ${p.l} L`;
+  $("p-winbar").style.width=(tot?p.w/tot*100:50)+"%";
+  $("p-win").textContent=tot?Math.round(p.w/tot*100)+"%":"—";
+  $("p-aw").textContent=p.avgWin?signed(p.avgWin):"—";
+  $("p-al").textContent=p.avgLoss?signed(p.avgLoss):"—";
+  const re=$("p-real"); re.textContent=signed(p.real||0); re.className="n "+cls(p.real||0);
+}
+
+function renderJournal(rows){
+  const tb=$("journal");
+  if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="6" class="empty">No trades yet.</td></tr>';return;}
+  tb.innerHTML=rows.map(r=>{
+    const pnl=r.pnl;
+    const pnlCell=pnl==null?'<span class="muted">open</span>':`<span class="${cls(pnl)}">${signed(pnl)}</span>`;
+    return `<tr><td class="muted">${r.t}</td><td><span class="sym">${r.sym}</span></td>
+      <td><span class="scan-act ${r.side==="buy"?"side-buy":"side-sell"}">${r.side}</span></td>
+      <td class="muted">${r.qty}</td><td>${money2(r.px)}</td><td>${pnlCell}</td></tr>`;
+  }).join("");
+}
+
+function setStatus(isRunning){
+  running=isRunning;
+  document.body.classList.toggle("live",isRunning);
+  const c=$("chip-status");
+  c.className="chip"+(isRunning?" live":"");
+  c.innerHTML=`<span class="dot"></span>${isRunning?"Running":"Idle"}`;
+  $("b-start").disabled=isRunning;
+  $("b-stop").disabled=!isRunning;
+}
+
+function paint(d){
+  renderHero(d.account, d.risk, (d.positions||[]).length, d.posCap||15, d.universe||0);
+  renderPositions(d.positions);
+  renderScan(d.scan);
+  renderPerf(d.perf);
+  renderJournal(d.journal);
+}
+
+/* ---- live data: poll the real backend, fall back to the sample folio ---- */
+async function get(path,ms=4000){
+  const r=await fetch(API+path,{signal:AbortSignal.timeout(ms)});
+  if(!r.ok) throw new Error(r.status); return r.json();
+}
+function adminToken(){ return sessionStorage.getItem("KTRADE_ADMIN_TOKEN")||""; }
+function setAdminToken(){
+  const t=prompt("Enter KTrade admin token (stored for this browser session only):", adminToken());
+  if(t!==null){ sessionStorage.setItem("KTRADE_ADMIN_TOKEN",t.trim()); }
+}
+async function post(path, body={}, ms=8000){
+  const headers={"Content-Type":"application/json"};
+  const t=adminToken(); if(t) headers["X-KTrade-Admin-Token"]=t;
+  const r=await fetch(API+path,{method:"POST",headers,body:JSON.stringify(body),signal:AbortSignal.timeout(ms)});
+  if(!r.ok){ const txt=await r.text().catch(()=>""); throw new Error(`${r.status} ${txt}`.trim()); }
+  return r.json().catch(()=>({}));
+}
+async function controlPost(path, body={}){
+  try{ await post(path, body); return true; }
+  catch(e){
+    const m=String(e.message||e);
+    alert((m.startsWith("401")||m.startsWith("403"))
+      ? "Not authorized ("+m+").\n\nClick “Token” and enter your KTRADE_ADMIN_TOKEN, then retry."
+      : "Request failed: "+m);
+    return false;
+  }
+}
+
+function markDemo(on){ demoMode=on; document.body.classList.toggle("is-demo",on); }
+
+async function refresh(){
+  try{
+    const all=await get("/all");
+    const a=all.account||{};
+    const acc={equity:+a.equity||0, buying_power:+a.buying_power||+a.cash||0,
+      day_pnl:+a.day_pnl||0, day_pnl_pct:+a.day_pnl_pct||0};
+    const positions=(all.positions||[]).map(p=>({
+      ticker:p.ticker, qty:+p.qty||0, avg:+p.avg_entry_price||+p.avg||0,
+      price:+(all.prices?.[p.ticker])||+p.price||0,
+      pnl:+p.unrealized_pl||+p.pnl||0
+    }));
+    $("recon").textContent=(all.reconciliation?.status||"reconciled").toLowerCase();
+    $("chip-mode").textContent=(all.mode||"paper");
+    markDemo(false);
+    // scan + perf + journal: keep sample until wired to /scan and /closed_trades
+    let journal=DEMO.journal, perf=DEMO.perf;
+    try{ const ct=await get("/closed_trades",5000);
+      if(Array.isArray(ct)&&ct.length){ journal=ct.slice(0,8).map(t=>({t:(t.exit_time||"").slice(11,16)||"—",
+        sym:t.ticker, side:(t.side||"sell"), qty:+t.qty||0, px:+t.exit_price||+t.price||0, pnl:+t.pnl||0})); }
+    }catch(_){}
+    const scanRows=(all.signals||all.scan||[]).map(s=>({
+      ticker:s.ticker, action:(s.action||s.label||"WATCH"),
+      conv:Math.round(+s.conviction||+s.score||0)
+    })).filter(s=>s.ticker);
+    paint({account:acc, positions, risk:+all.open_risk_pct||DEMO.risk,
+      posCap:+all.max_positions||15, universe:+all.universe||DEMO.universe,
+      scan:scanRows.length?scanRows:DEMO.scan, perf, journal});
+  }catch(e){
+    markDemo(true); paint(DEMO);
+  }
+  try{ const s=await get("/auto/status"); setStatus(!!(s.running||s.active)); }
+  catch(e){ /* leave status as-is */ }
+}
+
+/* ---- controls ---- */
+$("b-token").onclick=setAdminToken;
+$("b-start").onclick=async()=>{ if(await controlPost("/auto/start")){ setStatus(true); } refresh(); };
+$("b-stop").onclick =async()=>{ if(await controlPost("/auto/stop")){ setStatus(false); } refresh(); };
+$("b-once").onclick =async()=>{ if(await controlPost("/auto/run-once")){ setTimeout(refresh,1500); } };
+$("kill").onclick   =async()=>{
+  if(!confirm("EMERGENCY KILL — disable the agent now?")) return;
+  const flatten=confirm("Also FLATTEN all open positions and cancel resting orders?\n\nOK = kill + flatten   ·   Cancel = kill only");
+  if(await controlPost("/emergency/kill",{flatten})){ setStatus(false); }
+  refresh();
+};
+
+/* ---- boot ---- */
+paint(DEMO); markDemo(true); setStatus(false);
+refresh();
+setInterval(refresh, 6000);
+</script>
+</body>
+</html>
