@@ -1,0 +1,2113 @@
+{
+  "QQQ": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.1
+      },
+      "total_return": 0.18,
+      "sharpe": 0.81,
+      "sortino": 1.13,
+      "max_drawdown": 1.67,
+      "win_rate": 50.0,
+      "total_trades": 10,
+      "profit_factor": 1.1,
+      "approved_at": "2026-06-20T01:21:30.298259"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.9
+      },
+      "total_return": 0.82,
+      "sharpe": 4.154,
+      "sortino": 6.308,
+      "max_drawdown": 0.93,
+      "win_rate": 33.3,
+      "total_trades": 9,
+      "profit_factor": 1.85,
+      "approved_at": "2026-06-20T01:21:30.298272"
+    }
+  },
+  "IWM": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.5
+      },
+      "total_return": 0.49,
+      "sharpe": 1.897,
+      "sortino": 2.715,
+      "max_drawdown": 1.71,
+      "win_rate": 55.6,
+      "total_trades": 9,
+      "profit_factor": 1.27,
+      "approved_at": "2026-06-20T01:21:30.298279"
+    }
+  },
+  "GLD": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.5
+      },
+      "total_return": 2.78,
+      "sharpe": 9.517,
+      "sortino": 20.583,
+      "max_drawdown": 1.18,
+      "win_rate": 50.0,
+      "total_trades": 6,
+      "profit_factor": 5.31,
+      "approved_at": "2026-06-20T01:21:30.298285"
+    }
+  },
+  "TLT": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.25
+      },
+      "total_return": 0.06,
+      "sharpe": 0.464,
+      "sortino": 0.651,
+      "max_drawdown": 1.22,
+      "win_rate": 50.0,
+      "total_trades": 8,
+      "profit_factor": 1.05,
+      "approved_at": "2026-06-20T01:21:30.298291"
+    }
+  },
+  "SPY": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.5
+      },
+      "total_return": 0.1,
+      "sharpe": 0.368,
+      "sortino": 0.519,
+      "max_drawdown": 1.48,
+      "win_rate": 41.7,
+      "total_trades": 12,
+      "profit_factor": 1.06,
+      "approved_at": "2026-06-19T21:59:52.977449"
+    }
+  },
+  "NVDA": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.0
+      },
+      "total_return": 4.81,
+      "sharpe": 3.85,
+      "sortino": 5.84,
+      "max_drawdown": 8.59,
+      "win_rate": 51.9,
+      "total_trades": 27,
+      "profit_factor": 1.43,
+      "approved_at": "2026-06-19T21:59:52.977501"
+    }
+  },
+  "MSFT": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.25
+      },
+      "total_return": 1.33,
+      "sharpe": 2.356,
+      "sortino": 3.422,
+      "max_drawdown": 3.46,
+      "win_rate": 50.0,
+      "total_trades": 12,
+      "profit_factor": 1.57,
+      "approved_at": "2026-06-19T21:59:52.977509"
+    }
+  },
+  "GEV": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.1
+      },
+      "total_return": 0.63,
+      "sharpe": 1.117,
+      "sortino": 1.541,
+      "max_drawdown": 4.97,
+      "win_rate": 50.0,
+      "total_trades": 12,
+      "profit_factor": 1.13,
+      "approved_at": "2026-06-20T01:21:30.298316"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 1.0
+      },
+      "total_return": 1.73,
+      "sharpe": 6.859,
+      "sortino": 10.563,
+      "max_drawdown": 1.83,
+      "win_rate": 50.0,
+      "total_trades": 6,
+      "profit_factor": 2.3,
+      "approved_at": "2026-06-20T01:21:30.298320"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 0.9
+      },
+      "total_return": 2.78,
+      "sharpe": 7.499,
+      "sortino": 11.58,
+      "max_drawdown": 2.68,
+      "win_rate": 42.9,
+      "total_trades": 14,
+      "profit_factor": 1.98,
+      "approved_at": "2026-06-20T01:21:30.298323"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.001
+      },
+      "total_return": 0.19,
+      "sharpe": 0.681,
+      "sortino": 0.974,
+      "max_drawdown": 1.9,
+      "win_rate": 27.3,
+      "total_trades": 11,
+      "profit_factor": 1.06,
+      "approved_at": "2026-06-20T01:21:30.298327"
+    }
+  },
+  "ETN": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 60,
+        "volume_mult": 1.5
+      },
+      "total_return": 0.99,
+      "sharpe": 3.474,
+      "sortino": 5.575,
+      "max_drawdown": 2.28,
+      "win_rate": 66.7,
+      "total_trades": 6,
+      "profit_factor": 1.5,
+      "approved_at": "2026-06-20T01:21:30.298331"
+    }
+  },
+  "PWR": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.5
+      },
+      "total_return": 0.73,
+      "sharpe": 1.923,
+      "sortino": 2.576,
+      "max_drawdown": 1.41,
+      "win_rate": 42.9,
+      "total_trades": 7,
+      "profit_factor": 1.37,
+      "approved_at": "2026-06-19T21:59:52.977547"
+    }
+  },
+  "VRT": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.0
+      },
+      "total_return": 6.48,
+      "sharpe": 5.887,
+      "sortino": 8.765,
+      "max_drawdown": 2.72,
+      "win_rate": 66.7,
+      "total_trades": 12,
+      "profit_factor": 3.4,
+      "approved_at": "2026-06-19T21:59:52.977554"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "low": 35,
+        "high": 65
+      },
+      "total_return": 0.06,
+      "sharpe": 0.269,
+      "sortino": 0.378,
+      "max_drawdown": 5.71,
+      "win_rate": 56.2,
+      "total_trades": 32,
+      "profit_factor": 1.01,
+      "approved_at": "2026-06-20T01:21:30.298339"
+    }
+  },
+  "MOD": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.0
+      },
+      "total_return": 3.69,
+      "sharpe": 4.309,
+      "sortino": 6.232,
+      "max_drawdown": 4.11,
+      "win_rate": 66.7,
+      "total_trades": 6,
+      "profit_factor": 2.35,
+      "approved_at": "2026-06-19T21:59:52.977566"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 60,
+        "low": 40,
+        "high": 65
+      },
+      "total_return": 5.31,
+      "sharpe": 4.208,
+      "sortino": 6.264,
+      "max_drawdown": 5.54,
+      "win_rate": 63.0,
+      "total_trades": 27,
+      "profit_factor": 1.45,
+      "approved_at": "2026-06-20T01:21:30.298348"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.7
+      },
+      "total_return": 2.48,
+      "sharpe": 3.64,
+      "sortino": 5.295,
+      "max_drawdown": 2.76,
+      "win_rate": 31.2,
+      "total_trades": 16,
+      "profit_factor": 1.51,
+      "approved_at": "2026-06-20T01:21:30.298345"
+    }
+  },
+  "MPWR": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 60,
+        "volume_mult": 1.0
+      },
+      "total_return": 6.41,
+      "sharpe": 10.617,
+      "sortino": 18.427,
+      "max_drawdown": 1.43,
+      "win_rate": 85.7,
+      "total_trades": 7,
+      "profit_factor": 45.42,
+      "approved_at": "2026-06-20T01:21:30.298353"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 1.25
+      },
+      "total_return": 0.48,
+      "sharpe": 1.577,
+      "sortino": 2.375,
+      "max_drawdown": 2.47,
+      "win_rate": 62.5,
+      "total_trades": 8,
+      "profit_factor": 1.36,
+      "approved_at": "2026-06-20T01:21:30.298356"
+    }
+  },
+  "NVTS": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.5
+      },
+      "total_return": 4.89,
+      "sharpe": 3.081,
+      "sortino": 4.649,
+      "max_drawdown": 12.56,
+      "win_rate": 50.0,
+      "total_trades": 10,
+      "profit_factor": 1.37,
+      "approved_at": "2026-06-20T01:21:30.298361"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.7
+      },
+      "total_return": 18.52,
+      "sharpe": 10.936,
+      "sortino": 19.224,
+      "max_drawdown": 5.8,
+      "win_rate": 50.0,
+      "total_trades": 12,
+      "profit_factor": 5.4,
+      "approved_at": "2026-06-20T01:21:30.298365"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 0.9
+      },
+      "total_return": 14.9,
+      "sharpe": 8.559,
+      "sortino": 14.345,
+      "max_drawdown": 8.11,
+      "win_rate": 47.4,
+      "total_trades": 19,
+      "profit_factor": 2.57,
+      "approved_at": "2026-06-20T01:21:30.298368"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.006
+      },
+      "total_return": 16.74,
+      "sharpe": 5.356,
+      "sortino": 8.287,
+      "max_drawdown": 9.48,
+      "win_rate": 23.7,
+      "total_trades": 59,
+      "profit_factor": 1.53,
+      "approved_at": "2026-06-19T21:59:52.977611"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "low": 25,
+        "high": 60
+      },
+      "total_return": 6.4,
+      "sharpe": 4.986,
+      "sortino": 8.09,
+      "max_drawdown": 5.03,
+      "win_rate": 64.7,
+      "total_trades": 17,
+      "profit_factor": 2.06,
+      "approved_at": "2026-06-20T01:21:30.298372"
+    },
+    "PREV_BAR_BREAKOUT": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "lookback": 12,
+        "volume_mult": 1.0
+      },
+      "total_return": 20.63,
+      "sharpe": 8.204,
+      "sortino": 18.338,
+      "max_drawdown": 12.18,
+      "win_rate": 30.8,
+      "total_trades": 52,
+      "profit_factor": 1.66,
+      "approved_at": "2026-06-20T01:21:30.298375"
+    }
+  },
+  "SOXX": {
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "volume_mult": 1.0
+      },
+      "total_return": 0.31,
+      "sharpe": 0.932,
+      "sortino": 1.414,
+      "max_drawdown": 1.12,
+      "win_rate": 46.2,
+      "total_trades": 13,
+      "profit_factor": 1.14,
+      "approved_at": "2026-06-19T21:59:52.977630"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 45,
+        "pullback_pct": 0.001
+      },
+      "total_return": 2.16,
+      "sharpe": 9.221,
+      "sortino": 14.973,
+      "max_drawdown": 0.9,
+      "win_rate": 66.7,
+      "total_trades": 6,
+      "profit_factor": 3.53,
+      "approved_at": "2026-06-20T01:21:30.298385"
+    }
+  },
+  "XAR": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.0
+      },
+      "total_return": 2.54,
+      "sharpe": 6.128,
+      "sortino": 9.771,
+      "max_drawdown": 2.08,
+      "win_rate": 50.0,
+      "total_trades": 8,
+      "profit_factor": 2.39,
+      "approved_at": "2026-06-20T01:21:30.298389"
+    }
+  },
+  "IDGT": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 60,
+        "volume_mult": 0.8
+      },
+      "total_return": 0.88,
+      "sharpe": 3.78,
+      "sortino": 5.869,
+      "max_drawdown": 1.43,
+      "win_rate": 54.5,
+      "total_trades": 11,
+      "profit_factor": 1.6,
+      "approved_at": "2026-06-19T21:59:52.977649"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 1.25
+      },
+      "total_return": 0.39,
+      "sharpe": 2.841,
+      "sortino": 5.011,
+      "max_drawdown": 1.4,
+      "win_rate": 16.7,
+      "total_trades": 6,
+      "profit_factor": 1.31,
+      "approved_at": "2026-06-20T01:21:30.298395"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "volume_mult": 1.1
+      },
+      "total_return": 0.1,
+      "sharpe": 0.712,
+      "sortino": 1.012,
+      "max_drawdown": 1.13,
+      "win_rate": 20.0,
+      "total_trades": 5,
+      "profit_factor": 1.07,
+      "approved_at": "2026-06-20T01:21:30.298399"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 60,
+        "low": 30,
+        "high": 65
+      },
+      "total_return": 1.1,
+      "sharpe": 3.802,
+      "sortino": 6.244,
+      "max_drawdown": 1.36,
+      "win_rate": 61.5,
+      "total_trades": 13,
+      "profit_factor": 1.73,
+      "approved_at": "2026-06-20T01:21:30.298402"
+    }
+  },
+  "MRVL": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 60,
+        "volume_mult": 0.8
+      },
+      "total_return": 9.16,
+      "sharpe": 7.451,
+      "sortino": 10.68,
+      "max_drawdown": 6.51,
+      "win_rate": 54.5,
+      "total_trades": 11,
+      "profit_factor": 3.87,
+      "approved_at": "2026-06-20T01:21:30.298415"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 45,
+        "volume_mult": 0.9
+      },
+      "total_return": 1.6,
+      "sharpe": 3.177,
+      "sortino": 4.833,
+      "max_drawdown": 4.31,
+      "win_rate": 38.5,
+      "total_trades": 13,
+      "profit_factor": 1.39,
+      "approved_at": "2026-06-20T01:21:30.298419"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 45,
+        "pullback_pct": 0.0015
+      },
+      "total_return": 1.58,
+      "sharpe": 3.09,
+      "sortino": 4.531,
+      "max_drawdown": 5.25,
+      "win_rate": 28.6,
+      "total_trades": 14,
+      "profit_factor": 1.28,
+      "approved_at": "2026-06-20T01:21:30.298422"
+    }
+  },
+  "MU": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.5
+      },
+      "total_return": 10.0,
+      "sharpe": 10.915,
+      "sortino": 16.942,
+      "max_drawdown": 3.42,
+      "win_rate": 50.0,
+      "total_trades": 6,
+      "profit_factor": 4.26,
+      "approved_at": "2026-06-20T01:21:30.298426"
+    }
+  },
+  "RMBS": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 0.8
+      },
+      "total_return": 11.21,
+      "sharpe": 9.979,
+      "sortino": 14.824,
+      "max_drawdown": 4.21,
+      "win_rate": 61.5,
+      "total_trades": 13,
+      "profit_factor": 2.35,
+      "approved_at": "2026-06-20T01:21:30.298431"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.006
+      },
+      "total_return": 4.94,
+      "sharpe": 3.871,
+      "sortino": 5.817,
+      "max_drawdown": 10.44,
+      "win_rate": 34.7,
+      "total_trades": 49,
+      "profit_factor": 1.23,
+      "approved_at": "2026-06-20T01:21:30.298438"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 60,
+        "low": 40,
+        "high": 60
+      },
+      "total_return": 6.15,
+      "sharpe": 4.261,
+      "sortino": 6.339,
+      "max_drawdown": 8.35,
+      "win_rate": 70.0,
+      "total_trades": 30,
+      "profit_factor": 1.69,
+      "approved_at": "2026-06-20T01:21:30.298442"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 45,
+        "volume_mult": 0.7
+      },
+      "total_return": 2.31,
+      "sharpe": 2.956,
+      "sortino": 4.266,
+      "max_drawdown": 4.29,
+      "win_rate": 47.4,
+      "total_trades": 19,
+      "profit_factor": 1.36,
+      "approved_at": "2026-06-20T01:21:30.298435"
+    }
+  },
+  "LEU": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.0
+      },
+      "total_return": 0.5,
+      "sharpe": 0.681,
+      "sortino": 0.945,
+      "max_drawdown": 9.43,
+      "win_rate": 33.3,
+      "total_trades": 15,
+      "profit_factor": 1.05,
+      "approved_at": "2026-06-20T01:21:30.298446"
+    }
+  },
+  "RGTI": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 0.8
+      },
+      "total_return": 5.99,
+      "sharpe": 2.752,
+      "sortino": 3.752,
+      "max_drawdown": 12.11,
+      "win_rate": 45.0,
+      "total_trades": 20,
+      "profit_factor": 1.24,
+      "approved_at": "2026-06-20T01:21:30.298451"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.006
+      },
+      "total_return": 8.73,
+      "sharpe": 3.995,
+      "sortino": 6.025,
+      "max_drawdown": 9.05,
+      "win_rate": 29.4,
+      "total_trades": 51,
+      "profit_factor": 1.36,
+      "approved_at": "2026-06-19T21:28:34.216745"
+    }
+  },
+  "QBTS": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.0
+      },
+      "total_return": 9.96,
+      "sharpe": 6.936,
+      "sortino": 10.211,
+      "max_drawdown": 7.07,
+      "win_rate": 50.0,
+      "total_trades": 12,
+      "profit_factor": 3.46,
+      "approved_at": "2026-06-20T01:21:30.298457"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 1.1
+      },
+      "total_return": 2.0,
+      "sharpe": 3.989,
+      "sortino": 6.097,
+      "max_drawdown": 1.93,
+      "win_rate": 71.4,
+      "total_trades": 7,
+      "profit_factor": 2.15,
+      "approved_at": "2026-06-20T01:21:30.298460"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 45,
+        "pullback_pct": 0.0025
+      },
+      "total_return": 3.27,
+      "sharpe": 4.784,
+      "sortino": 7.216,
+      "max_drawdown": 2.97,
+      "win_rate": 55.6,
+      "total_trades": 9,
+      "profit_factor": 2.5,
+      "approved_at": "2026-06-20T01:21:30.298467"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 1.1
+      },
+      "total_return": 0.66,
+      "sharpe": 0.999,
+      "sortino": 1.348,
+      "max_drawdown": 3.79,
+      "win_rate": 53.3,
+      "total_trades": 15,
+      "profit_factor": 1.14,
+      "approved_at": "2026-06-20T01:21:30.298464"
+    }
+  },
+  "IONQ": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.5
+      },
+      "total_return": 4.27,
+      "sharpe": 2.929,
+      "sortino": 4.182,
+      "max_drawdown": 13.89,
+      "win_rate": 38.5,
+      "total_trades": 13,
+      "profit_factor": 1.29,
+      "approved_at": "2026-06-20T01:21:30.298471"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 45,
+        "volume_mult": 0.9
+      },
+      "total_return": 1.75,
+      "sharpe": 1.327,
+      "sortino": 1.947,
+      "max_drawdown": 4.72,
+      "win_rate": 39.5,
+      "total_trades": 38,
+      "profit_factor": 1.12,
+      "approved_at": "2026-06-19T21:28:34.216763"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.0015
+      },
+      "total_return": 8.94,
+      "sharpe": 8.318,
+      "sortino": 13.695,
+      "max_drawdown": 2.95,
+      "win_rate": 33.3,
+      "total_trades": 12,
+      "profit_factor": 3.66,
+      "approved_at": "2026-06-19T21:28:34.216766"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.7
+      },
+      "total_return": 0.69,
+      "sharpe": 1.177,
+      "sortino": 1.732,
+      "max_drawdown": 3.99,
+      "win_rate": 38.5,
+      "total_trades": 13,
+      "profit_factor": 1.14,
+      "approved_at": "2026-06-20T01:21:30.298475"
+    }
+  },
+  "TQQQ": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.25
+      },
+      "total_return": 4.66,
+      "sharpe": 7.707,
+      "sortino": 11.712,
+      "max_drawdown": 3.34,
+      "win_rate": 83.3,
+      "total_trades": 6,
+      "profit_factor": 4.49,
+      "approved_at": "2026-06-20T01:21:30.298480"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.0015
+      },
+      "total_return": 2.77,
+      "sharpe": 2.471,
+      "sortino": 3.582,
+      "max_drawdown": 4.69,
+      "win_rate": 32.5,
+      "total_trades": 40,
+      "profit_factor": 1.23,
+      "approved_at": "2026-06-19T21:28:34.216773"
+    }
+  },
+  "NVAX": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.25
+      },
+      "total_return": 0.62,
+      "sharpe": 0.751,
+      "sortino": 1.134,
+      "max_drawdown": 10.55,
+      "win_rate": 41.7,
+      "total_trades": 12,
+      "profit_factor": 1.06,
+      "approved_at": "2026-06-20T01:21:30.298485"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.001
+      },
+      "total_return": 2.24,
+      "sharpe": 3.932,
+      "sortino": 7.186,
+      "max_drawdown": 3.07,
+      "win_rate": 12.5,
+      "total_trades": 8,
+      "profit_factor": 1.63,
+      "approved_at": "2026-06-20T01:21:30.298489"
+    }
+  },
+  "AMD": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.25
+      },
+      "total_return": 0.21,
+      "sharpe": 0.455,
+      "sortino": 0.645,
+      "max_drawdown": 5.06,
+      "win_rate": 45.5,
+      "total_trades": 11,
+      "profit_factor": 1.03,
+      "approved_at": "2026-06-20T01:21:30.298493"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "volume_mult": 1.1
+      },
+      "total_return": 4.88,
+      "sharpe": 7.207,
+      "sortino": 12.348,
+      "max_drawdown": 1.64,
+      "win_rate": 55.6,
+      "total_trades": 9,
+      "profit_factor": 3.92,
+      "approved_at": "2026-06-19T21:28:34.216784"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 1.1
+      },
+      "total_return": 2.92,
+      "sharpe": 5.097,
+      "sortino": 7.338,
+      "max_drawdown": 2.61,
+      "win_rate": 38.5,
+      "total_trades": 13,
+      "profit_factor": 1.56,
+      "approved_at": "2026-06-20T01:21:30.298497"
+    }
+  },
+  "INTC": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.25
+      },
+      "total_return": 8.58,
+      "sharpe": 5.116,
+      "sortino": 8.229,
+      "max_drawdown": 5.01,
+      "win_rate": 77.8,
+      "total_trades": 9,
+      "profit_factor": 5.59,
+      "approved_at": "2026-06-19T21:28:34.216791"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.004
+      },
+      "total_return": 2.64,
+      "sharpe": 1.909,
+      "sortino": 2.751,
+      "max_drawdown": 10.04,
+      "win_rate": 36.2,
+      "total_trades": 47,
+      "profit_factor": 1.15,
+      "approved_at": "2026-06-19T21:28:34.216794"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 60,
+        "low": 35,
+        "high": 55
+      },
+      "total_return": 0.92,
+      "sharpe": 1.023,
+      "sortino": 1.489,
+      "max_drawdown": 10.44,
+      "win_rate": 62.5,
+      "total_trades": 32,
+      "profit_factor": 1.08,
+      "approved_at": "2026-06-20T01:21:30.298502"
+    }
+  },
+  "CRDO": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.1
+      },
+      "total_return": 13.56,
+      "sharpe": 8.803,
+      "sortino": 13.245,
+      "max_drawdown": 6.88,
+      "win_rate": 60.0,
+      "total_trades": 10,
+      "profit_factor": 3.7,
+      "approved_at": "2026-06-20T01:21:30.298506"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 1.25
+      },
+      "total_return": 4.15,
+      "sharpe": 6.87,
+      "sortino": 14.573,
+      "max_drawdown": 1.83,
+      "win_rate": 57.1,
+      "total_trades": 7,
+      "profit_factor": 3.89,
+      "approved_at": "2026-06-20T01:21:30.298510"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 1.1
+      },
+      "total_return": 1.58,
+      "sharpe": 1.108,
+      "sortino": 1.647,
+      "max_drawdown": 7.67,
+      "win_rate": 36.8,
+      "total_trades": 38,
+      "profit_factor": 1.11,
+      "approved_at": "2026-06-19T21:28:34.216804"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.0025
+      },
+      "total_return": 5.34,
+      "sharpe": 5.901,
+      "sortino": 8.753,
+      "max_drawdown": 3.98,
+      "win_rate": 25.0,
+      "total_trades": 12,
+      "profit_factor": 2.35,
+      "approved_at": "2026-06-20T01:21:30.298513"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "low": 40,
+        "high": 60
+      },
+      "total_return": 12.03,
+      "sharpe": 7.853,
+      "sortino": 12.738,
+      "max_drawdown": 5.07,
+      "win_rate": 66.7,
+      "total_trades": 27,
+      "profit_factor": 2.63,
+      "approved_at": "2026-06-20T01:21:30.298516"
+    },
+    "PREV_BAR_BREAKOUT": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "lookback": 3,
+        "volume_mult": 1.25
+      },
+      "total_return": 3.14,
+      "sharpe": 3.064,
+      "sortino": 4.937,
+      "max_drawdown": 6.83,
+      "win_rate": 39.5,
+      "total_trades": 43,
+      "profit_factor": 1.26,
+      "approved_at": "2026-06-20T01:21:30.298520"
+    }
+  },
+  "PL": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 60,
+        "volume_mult": 1.1
+      },
+      "total_return": 3.04,
+      "sharpe": 1.651,
+      "sortino": 2.33,
+      "max_drawdown": 8.86,
+      "win_rate": 53.3,
+      "total_trades": 15,
+      "profit_factor": 1.37,
+      "approved_at": "2026-06-19T21:28:34.216816"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.9
+      },
+      "total_return": 1.66,
+      "sharpe": 2.786,
+      "sortino": 4.354,
+      "max_drawdown": 3.97,
+      "win_rate": 40.0,
+      "total_trades": 5,
+      "profit_factor": 1.68,
+      "approved_at": "2026-06-20T01:21:30.298524"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 0.7
+      },
+      "total_return": 1.57,
+      "sharpe": 1.008,
+      "sortino": 1.473,
+      "max_drawdown": 9.25,
+      "win_rate": 37.5,
+      "total_trades": 56,
+      "profit_factor": 1.07,
+      "approved_at": "2026-06-19T21:28:34.216822"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "low": 30,
+        "high": 65
+      },
+      "total_return": 5.47,
+      "sharpe": 3.537,
+      "sortino": 5.318,
+      "max_drawdown": 10.89,
+      "win_rate": 72.4,
+      "total_trades": 29,
+      "profit_factor": 1.3,
+      "approved_at": "2026-06-20T01:21:30.298530"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "pullback_pct": 0.0025
+      },
+      "total_return": 0.96,
+      "sharpe": 2.035,
+      "sortino": 3.15,
+      "max_drawdown": 3.71,
+      "win_rate": 25.0,
+      "total_trades": 8,
+      "profit_factor": 1.25,
+      "approved_at": "2026-06-20T01:21:30.298528"
+    }
+  },
+  "NOK": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 0.8
+      },
+      "total_return": 12.63,
+      "sharpe": 11.244,
+      "sortino": 17.762,
+      "max_drawdown": 4.44,
+      "win_rate": 58.3,
+      "total_trades": 12,
+      "profit_factor": 3.62,
+      "approved_at": "2026-06-20T01:21:30.298535"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 0.5
+      },
+      "total_return": 5.02,
+      "sharpe": 6.195,
+      "sortino": 10.483,
+      "max_drawdown": 4.96,
+      "win_rate": 34.6,
+      "total_trades": 26,
+      "profit_factor": 1.66,
+      "approved_at": "2026-06-20T01:21:30.298541"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.001
+      },
+      "total_return": 6.52,
+      "sharpe": 11.887,
+      "sortino": 24.192,
+      "max_drawdown": 2.31,
+      "win_rate": 42.9,
+      "total_trades": 7,
+      "profit_factor": 5.38,
+      "approved_at": "2026-06-20T01:21:30.298544"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.9
+      },
+      "total_return": 0.75,
+      "sharpe": 1.726,
+      "sortino": 3.058,
+      "max_drawdown": 2.98,
+      "win_rate": 33.3,
+      "total_trades": 9,
+      "profit_factor": 1.34,
+      "approved_at": "2026-06-20T01:21:30.298538"
+    }
+  },
+  "ARM": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 0.8
+      },
+      "total_return": 14.21,
+      "sharpe": 11.458,
+      "sortino": 17.569,
+      "max_drawdown": 4.78,
+      "win_rate": 83.3,
+      "total_trades": 12,
+      "profit_factor": 6.78,
+      "approved_at": "2026-06-20T01:21:30.298549"
+    }
+  },
+  "NBIS": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 0.8
+      },
+      "total_return": 10.29,
+      "sharpe": 2.97,
+      "sortino": 4.224,
+      "max_drawdown": 12.99,
+      "win_rate": 45.2,
+      "total_trades": 42,
+      "profit_factor": 1.26,
+      "approved_at": "2026-06-19T21:59:52.977691"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.7
+      },
+      "total_return": 1.3,
+      "sharpe": 1.485,
+      "sortino": 2.153,
+      "max_drawdown": 5.77,
+      "win_rate": 35.7,
+      "total_trades": 14,
+      "profit_factor": 1.15,
+      "approved_at": "2026-06-20T01:21:30.298555"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 0.9
+      },
+      "total_return": 2.68,
+      "sharpe": 3.072,
+      "sortino": 4.426,
+      "max_drawdown": 4.53,
+      "win_rate": 38.9,
+      "total_trades": 18,
+      "profit_factor": 1.31,
+      "approved_at": "2026-06-20T01:21:30.298558"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 45,
+        "pullback_pct": 0.004
+      },
+      "total_return": 4.98,
+      "sharpe": 2.855,
+      "sortino": 4.225,
+      "max_drawdown": 5.7,
+      "win_rate": 27.1,
+      "total_trades": 48,
+      "profit_factor": 1.23,
+      "approved_at": "2026-06-19T21:59:52.977705"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "low": 25,
+        "high": 55
+      },
+      "total_return": 2.61,
+      "sharpe": 2.515,
+      "sortino": 4.074,
+      "max_drawdown": 7.97,
+      "win_rate": 60.0,
+      "total_trades": 20,
+      "profit_factor": 1.29,
+      "approved_at": "2026-06-20T01:21:30.298561"
+    }
+  },
+  "QCOM": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.1
+      },
+      "total_return": 4.75,
+      "sharpe": 3.541,
+      "sortino": 5.35,
+      "max_drawdown": 4.72,
+      "win_rate": 58.3,
+      "total_trades": 12,
+      "profit_factor": 1.55,
+      "approved_at": "2026-06-20T01:21:30.298565"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "low": 30,
+        "high": 55
+      },
+      "total_return": 5.51,
+      "sharpe": 4.968,
+      "sortino": 7.376,
+      "max_drawdown": 6.19,
+      "win_rate": 63.3,
+      "total_trades": 30,
+      "profit_factor": 1.93,
+      "approved_at": "2026-06-20T01:21:30.298570"
+    }
+  },
+  "MSTR": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 0.8
+      },
+      "total_return": 7.48,
+      "sharpe": 7.336,
+      "sortino": 11.532,
+      "max_drawdown": 5.43,
+      "win_rate": 50.0,
+      "total_trades": 10,
+      "profit_factor": 2.3,
+      "approved_at": "2026-06-20T01:21:30.298574"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 0.7
+      },
+      "total_return": 14.82,
+      "sharpe": 13.435,
+      "sortino": 22.504,
+      "max_drawdown": 4.15,
+      "win_rate": 40.0,
+      "total_trades": 30,
+      "profit_factor": 2.53,
+      "approved_at": "2026-06-20T01:21:30.298581"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 90,
+        "low": 35,
+        "high": 60
+      },
+      "total_return": 0.39,
+      "sharpe": 0.418,
+      "sortino": 0.627,
+      "max_drawdown": 6.47,
+      "win_rate": 64.6,
+      "total_trades": 65,
+      "profit_factor": 1.02,
+      "approved_at": "2026-06-19T21:59:52.977739"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.7
+      },
+      "total_return": 0.71,
+      "sharpe": 1.608,
+      "sortino": 2.201,
+      "max_drawdown": 2.78,
+      "win_rate": 44.4,
+      "total_trades": 9,
+      "profit_factor": 1.24,
+      "approved_at": "2026-06-20T01:21:30.298578"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "pullback_pct": 0.0015
+      },
+      "total_return": 0.66,
+      "sharpe": 1.478,
+      "sortino": 2.231,
+      "max_drawdown": 3.54,
+      "win_rate": 33.3,
+      "total_trades": 12,
+      "profit_factor": 1.23,
+      "approved_at": "2026-06-20T01:21:30.298584"
+    }
+  },
+  "SMCI": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 0.8
+      },
+      "total_return": 18.25,
+      "sharpe": 11.524,
+      "sortino": 18.431,
+      "max_drawdown": 6.22,
+      "win_rate": 63.6,
+      "total_trades": 11,
+      "profit_factor": 6.22,
+      "approved_at": "2026-06-20T01:21:30.298588"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 1.25
+      },
+      "total_return": 7.96,
+      "sharpe": 8.855,
+      "sortino": 17.775,
+      "max_drawdown": 4.75,
+      "win_rate": 33.3,
+      "total_trades": 9,
+      "profit_factor": 2.88,
+      "approved_at": "2026-06-20T01:21:30.298592"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 1.1
+      },
+      "total_return": 6.74,
+      "sharpe": 6.442,
+      "sortino": 10.848,
+      "max_drawdown": 7.18,
+      "win_rate": 28.6,
+      "total_trades": 14,
+      "profit_factor": 1.85,
+      "approved_at": "2026-06-20T01:21:30.298595"
+    }
+  },
+  "IREN": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.0
+      },
+      "total_return": 12.26,
+      "sharpe": 9.452,
+      "sortino": 14.616,
+      "max_drawdown": 4.51,
+      "win_rate": 75.0,
+      "total_trades": 8,
+      "profit_factor": 3.81,
+      "approved_at": "2026-06-20T01:21:30.298600"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "volume_mult": 1.25
+      },
+      "total_return": 0.67,
+      "sharpe": 0.714,
+      "sortino": 1.286,
+      "max_drawdown": 6.25,
+      "win_rate": 35.7,
+      "total_trades": 14,
+      "profit_factor": 1.11,
+      "approved_at": "2026-06-19T21:59:52.977767"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 1.1
+      },
+      "total_return": 3.06,
+      "sharpe": 3.903,
+      "sortino": 6.133,
+      "max_drawdown": 4.06,
+      "win_rate": 57.1,
+      "total_trades": 14,
+      "profit_factor": 1.65,
+      "approved_at": "2026-06-20T01:21:30.298603"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "low": 25,
+        "high": 55
+      },
+      "total_return": 10.04,
+      "sharpe": 8.751,
+      "sortino": 14.636,
+      "max_drawdown": 6.59,
+      "win_rate": 52.9,
+      "total_trades": 17,
+      "profit_factor": 2.91,
+      "approved_at": "2026-06-20T01:21:30.298607"
+    }
+  },
+  "CRWV": {
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "volume_mult": 0.7
+      },
+      "total_return": 3.21,
+      "sharpe": 2.219,
+      "sortino": 3.507,
+      "max_drawdown": 7.89,
+      "win_rate": 35.7,
+      "total_trades": 42,
+      "profit_factor": 1.21,
+      "approved_at": "2026-06-19T21:59:52.977783"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 60,
+        "pullback_pct": 0.0015
+      },
+      "total_return": 1.38,
+      "sharpe": 1.559,
+      "sortino": 2.322,
+      "max_drawdown": 4.48,
+      "win_rate": 20.0,
+      "total_trades": 20,
+      "profit_factor": 1.16,
+      "approved_at": "2026-06-19T21:59:52.977788"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "low": 25,
+        "high": 65
+      },
+      "total_return": 2.74,
+      "sharpe": 2.708,
+      "sortino": 4.274,
+      "max_drawdown": 5.21,
+      "win_rate": 52.6,
+      "total_trades": 19,
+      "profit_factor": 1.33,
+      "approved_at": "2026-06-20T01:21:30.298613"
+    }
+  },
+  "RKLB": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.5
+      },
+      "total_return": 11.54,
+      "sharpe": 5.283,
+      "sortino": 8.369,
+      "max_drawdown": 6.78,
+      "win_rate": 50.0,
+      "total_trades": 14,
+      "profit_factor": 1.97,
+      "approved_at": "2026-06-19T21:59:52.977794"
+    },
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "volume_mult": 1.25
+      },
+      "total_return": 2.68,
+      "sharpe": 2.655,
+      "sortino": 4.32,
+      "max_drawdown": 5.55,
+      "win_rate": 33.3,
+      "total_trades": 12,
+      "profit_factor": 1.39,
+      "approved_at": "2026-06-19T21:59:52.977799"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "60d",
+      "params": {
+        "start_minutes": 45,
+        "volume_mult": 0.9
+      },
+      "total_return": 7.7,
+      "sharpe": 5.027,
+      "sortino": 7.987,
+      "max_drawdown": 5.1,
+      "win_rate": 47.2,
+      "total_trades": 36,
+      "profit_factor": 1.71,
+      "approved_at": "2026-06-19T21:59:52.977804"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "pullback_pct": 0.001
+      },
+      "total_return": 0.68,
+      "sharpe": 1.297,
+      "sortino": 1.883,
+      "max_drawdown": 2.81,
+      "win_rate": 33.3,
+      "total_trades": 6,
+      "profit_factor": 1.32,
+      "approved_at": "2026-06-20T01:21:30.298617"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "low": 35,
+        "high": 55
+      },
+      "total_return": 15.11,
+      "sharpe": 10.219,
+      "sortino": 16.346,
+      "max_drawdown": 4.89,
+      "win_rate": 72.7,
+      "total_trades": 33,
+      "profit_factor": 2.01,
+      "approved_at": "2026-06-20T01:21:30.298620"
+    }
+  },
+  "IRDM": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 0.8
+      },
+      "total_return": 3.03,
+      "sharpe": 2.815,
+      "sortino": 4.115,
+      "max_drawdown": 5.38,
+      "win_rate": 38.5,
+      "total_trades": 13,
+      "profit_factor": 1.37,
+      "approved_at": "2026-06-20T01:21:30.298624"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 30,
+        "volume_mult": 1.1
+      },
+      "total_return": 0.3,
+      "sharpe": 0.877,
+      "sortino": 1.208,
+      "max_drawdown": 3.22,
+      "win_rate": 36.4,
+      "total_trades": 11,
+      "profit_factor": 1.08,
+      "approved_at": "2026-06-20T01:21:30.298628"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 60,
+        "pullback_pct": 0.001
+      },
+      "total_return": 0.19,
+      "sharpe": 0.625,
+      "sortino": 0.899,
+      "max_drawdown": 2.95,
+      "win_rate": 30.0,
+      "total_trades": 10,
+      "profit_factor": 1.06,
+      "approved_at": "2026-06-20T01:21:30.298631"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "low": 35,
+        "high": 55
+      },
+      "total_return": 1.53,
+      "sharpe": 2.271,
+      "sortino": 3.431,
+      "max_drawdown": 3.7,
+      "win_rate": 53.8,
+      "total_trades": 26,
+      "profit_factor": 1.33,
+      "approved_at": "2026-06-20T01:21:30.298634"
+    }
+  },
+  "KTOS": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 15,
+        "volume_mult": 1.25
+      },
+      "total_return": 3.87,
+      "sharpe": 6.378,
+      "sortino": 9.755,
+      "max_drawdown": 3.55,
+      "win_rate": 66.7,
+      "total_trades": 6,
+      "profit_factor": 3.31,
+      "approved_at": "2026-06-20T01:21:30.298638"
+    }
+  },
+  "DXYZ": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 45,
+        "volume_mult": 1.25
+      },
+      "total_return": 5.3,
+      "sharpe": 2.92,
+      "sortino": 4.189,
+      "max_drawdown": 9.31,
+      "win_rate": 40.0,
+      "total_trades": 5,
+      "profit_factor": 1.52,
+      "approved_at": "2026-06-20T01:21:30.298643"
+    },
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "low": 25,
+        "high": 65
+      },
+      "total_return": 17.12,
+      "sharpe": 8.959,
+      "sortino": 13.875,
+      "max_drawdown": 10.85,
+      "win_rate": 72.7,
+      "total_trades": 22,
+      "profit_factor": 1.98,
+      "approved_at": "2026-06-20T01:21:30.298647"
+    }
+  },
+  "BTC-USD": {
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 1.25
+      },
+      "total_return": 1.33,
+      "sharpe": 2.442,
+      "sortino": 3.853,
+      "max_drawdown": 1.04,
+      "win_rate": 55.6,
+      "total_trades": 9,
+      "profit_factor": 3.62,
+      "approved_at": "2026-06-20T01:21:30.298651"
+    }
+  },
+  "VST": {
+    "VWAP_RECLAIM": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "volume_mult": 0.7
+      },
+      "total_return": 3.12,
+      "sharpe": 8.433,
+      "sortino": 13.674,
+      "max_drawdown": 1.75,
+      "win_rate": 77.8,
+      "total_trades": 9,
+      "profit_factor": 4.24,
+      "approved_at": "2026-06-20T01:21:30.298308"
+    },
+    "VWAP_PULLBACK": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 45,
+        "pullback_pct": 0.004
+      },
+      "total_return": 2.17,
+      "sharpe": 3.366,
+      "sortino": 5.146,
+      "max_drawdown": 4.99,
+      "win_rate": 35.1,
+      "total_trades": 37,
+      "profit_factor": 1.25,
+      "approved_at": "2026-06-20T01:21:30.298311"
+    }
+  },
+  "TLN": {
+    "RSI_REVERSAL": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "low": 25,
+        "high": 60
+      },
+      "total_return": 1.11,
+      "sharpe": 1.913,
+      "sortino": 2.873,
+      "max_drawdown": 2.9,
+      "win_rate": 61.1,
+      "total_trades": 18,
+      "profit_factor": 1.31,
+      "approved_at": "2026-06-20T01:21:30.298380"
+    }
+  },
+  "DRAM": {
+    "ORB_VWAP": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "opening_minutes": 30,
+        "volume_mult": 1.5
+      },
+      "total_return": 5.48,
+      "sharpe": 9.285,
+      "sortino": 14.101,
+      "max_drawdown": 2.72,
+      "win_rate": 80.0,
+      "total_trades": 5,
+      "profit_factor": 4.04,
+      "approved_at": "2026-06-20T01:21:30.298408"
+    },
+    "TREND_CONTINUATION": {
+      "approved": true,
+      "interval": "5m",
+      "period": "30d",
+      "params": {
+        "start_minutes": 90,
+        "volume_mult": 0.5
+      },
+      "total_return": 3.07,
+      "sharpe": 4.503,
+      "sortino": 6.949,
+      "max_drawdown": 4.68,
+      "win_rate": 30.8,
+      "total_trades": 26,
+      "profit_factor": 1.31,
+      "approved_at": "2026-06-20T01:21:30.298411"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "net_worth": 540000.0,
+  "liquid": 180000.0,
+  "committed": 360000.0,
+  "trading_allocation": 100000.0,
+  "as_of": "2026-06-27T14:00:00+00:00",
+  "sig": "<optional hex hmac-sha256 of the canonical body if KTRADE_PORTFOLIO_HMAC_SECRET is set>"
+}
