@@ -1,0 +1,39 @@
+name: Deploy KTrade to VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, example: v13.5"
+        required: true
+        default: "v13.4-github-test"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build release zip
+        run: |
+          zip -r Ktrade_${{ github.event.inputs.version }}_deploy.zip . \
+            -x ".git/*" ".github/*" ".env" ".env.*" ".venv/*" "venv/*" "__pycache__/*" "*.pyc" "*.log" "logs/*" "backups/*" "data/*.json" "data/*.jsonl" "data/*.csv" "*.zip" "*.tar.gz"
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload zip to VPS
+        run: |
+          scp Ktrade_${{ github.event.inputs.version }}_deploy.zip \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/Ktrade_${{ github.event.inputs.version }}_deploy.zip
+
+      - name: Deploy on VPS
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "/opt/deploy_ktrade_release.sh ${{ github.event.inputs.version }} /root/Ktrade_${{ github.event.inputs.version }}_deploy.zip"
