@@ -1,0 +1,74 @@
+# =========================
+# Secrets / environment
+# =========================
+.env
+.env.*
+!.env.template
+
+# =========================
+# Python environments
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Python cache
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# =========================
+# Logs
+# =========================
+*.log
+ktrade_agent.log
+ktrade_merged.log
+ktrade_bridge.stderr.log
+ktrade_bridge.stdout.log
+ktrade_vectorbt.log
+ktrade_intraday_vectorbt.log
+
+# =========================
+# Runtime trading data
+# =========================
+trade_journal.csv
+data/ktrade_scan_latest.json
+data/*.json
+data/*.jsonl
+data/*.csv
+
+# Keep folder structure if needed
+!data/.gitkeep
+
+# =========================
+# Backups / generated packages
+# =========================
+backups/
+PROJECT_DOCUMENTATION_PACKAGE/
+*.zip
+*.tar.gz
+*.bak
+
+# =========================
+# Models / downloaded ML files
+# =========================
+models/
+finbert_model/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db

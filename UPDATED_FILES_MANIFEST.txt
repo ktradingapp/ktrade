@@ -1,0 +1,17 @@
+Updated / important changed files:
+- agent/ktrade_agent_v9.py
+- data/ktrade_data.py
+- ktrade_intraday_vectorbt.py
+- backend/ktrade_alpaca.py
+- frontend/KTrade_preview.html
+- data/ktrade_signals.py
+- .gitignore
+- .env.template
+- PATCHED_CHANGES_v10_4.md
+
+Files intentionally excluded from this package:
+- .env
+- .venv/
+- __pycache__/
+- *.pyc
+- *.log

@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>KTrade PRO v10.0  Live</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(135deg,#f8fafc 0%,#e0f2fe 100%);color:#0f172a;font-family:system-ui,sans-serif}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#2563eb;border-radius:3px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes slideIn{from{transform:translateX(60px);opacity:0}to{transform:none;opacity:1}}
+
+/* Light Gray + Blue Finance Theme overrides */
+:root{--k-bg:#f8fafc;--k-bg2:#e0f2fe;--k-card:#ffffffcc;--k-card2:#eff6ff;--k-border:#bfdbfe;--k-text:#0f172a;--k-muted:#475569;--k-blue:#2563eb;--k-green:#15803d;--k-red:#dc2626;}
+body{background:linear-gradient(135deg,var(--k-bg) 0%,var(--k-bg2) 100%) !important;color:var(--k-text) !important;}
+button{box-shadow:0 1px 2px rgba(37,99,235,.08);}
+input{background:#ffffff !important;border-color:#93c5fd !important;color:var(--k-text) !important;}
+input::placeholder{color:#64748b !important;}
+[style*="background:#eff6ff"],[style*="background:#ffffff"]{box-shadow:0 1px 2px rgba(15,23,42,.04);}
+[style*="border:1px solid #bfdbfe"]{border-color:#bfdbfe !important;}
+[style*="color:#0f172a"]{color:var(--k-text) !important;}
+[style*="color:#475569"],[style*="color:#64748b"]{color:var(--k-muted) !important;}
+[style*="background:#2563eb"]{background:linear-gradient(135deg,#3b82f6,#1d4ed8) !important;color:#ffffff !important;border-color:#2563eb !important;}
+[style*="background:#dc2626"]{background:linear-gradient(135deg,#ef4444,#dc2626) !important;color:#ffffff !important;border-color:#dc2626 !important;}
+[style*="background:#dcfce7"]{background:#ecfdf5 !important;border-color:#86efac !important;color:#166534 !important;}
+
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback}=React;
+
+//  CONFIG 
+const API = "http://localhost:5001";  // Backend URL
+const REFRESH_MS = 5000;              // Price refresh every 5 seconds
+
+// Demo fallback prices (used when backend is offline)
+const DEMO_PRICES = {NVDA:131.2,TSLA:228.4,QQQ:478.6,QNT:100.0,AAPL:195.3,MSFT:412.8,GOOGL:172.5,ORCL:155.2,IBM:208.4};
+
+const SIGNALS=[
+  {id:1,ticker:"NVDA",type:"CALL",strike:140,expiry:"Jun 27",entry:2.40,target:4.80,stop:1.20,conviction:92,strategy:"ORB Breakout",status:"LIVE",pnl:null,label:"BUY",rationale:"Pre-market sweep >10K contracts. MACD cross on 15m. ORB cleared $130 clean."},
+  {id:2,ticker:"MSFT",type:"CALL",strike:420,expiry:"Jul 18",entry:3.10,target:6.20,stop:1.55,conviction:87,strategy:"EMA Confluence",status:"LIVE",pnl:null,label:"BUY",rationale:"EMA 9/21 confluence on daily. Earnings catalyst 5 weeks out. IV at 30-day low."},
+  {id:3,ticker:"GOOGL",type:"CALL",strike:175,expiry:"Jul 25",entry:2.20,target:4.40,stop:1.10,conviction:85,strategy:"AI Tailwind",status:"LIVE",pnl:null,label:"BUY",rationale:"Gemini 2.0 driving search monetization. Multi-agent consensus: 4/5 bullish."},
+  {id:4,ticker:"TSLA",type:"PUT",strike:220,expiry:"Jun 20",entry:1.80,target:3.60,stop:0.90,conviction:78,strategy:"Asymmetric Downside",status:"LIVE",pnl:null,label:"WATCH",rationale:"Failed breakout at $235. Volume declining. Risk-reward 2:1 downside."},
+  {id:5,ticker:"AAPL",type:"CALL",strike:200,expiry:"Jul 25",entry:2.95,target:5.90,stop:1.47,conviction:68,strategy:"Momentum",status:"LIVE",pnl:null,label:"WATCH",rationale:"Above 50 EMA but MACD not confirmed. Wait for breakout above $198."},
+  {id:6,ticker:"QQQ",type:"CALL",strike:485,expiry:"Jul 11",entry:4.20,target:8.40,stop:2.10,conviction:83,strategy:"Macro Momentum",status:"CLOSED",pnl:+94,label:"CLOSED",rationale:"Fed pause confirmed. Closed at target +$94/contract."},
+  {id:7,ticker:"AAPL",type:"CALL",strike:200,expiry:"Jul 25",entry:2.95,target:5.90,stop:1.47,conviction:81,strategy:"WWDC Catalyst",status:"CLOSED",pnl:-53,label:"CLOSED",rationale:"WWDC less impactful. Stopped out -$53. Loss documented."},
+  {id:8,ticker:"QNT",type:"STOCK",strike:100,expiry:"Watchlist",entry:100.00,target:106.00,stop:97.00,conviction:70,strategy:"Watchlist",status:"LIVE",pnl:null,label:"WATCH",rationale:"QNT added to KTrade watchlist. Auto-trade will only execute if backend scanner creates a BUY signal that passes risk rules."},
+];
+
+const EXTRA_WATCHLIST_SIGNALS=[
+  {id:"watch-QNT",ticker:"QNT",type:"STOCK",strike:100,expiry:"Watchlist",entry:100.00,target:106.00,stop:97.00,conviction:70,strategy:"Watchlist",status:"LIVE",pnl:null,label:"WATCH",rationale:"QNT added to KTrade watchlist. Auto-trade will only execute if backend scanner creates a BUY signal that passes risk rules."},
+];
+const ensureWatchlistSignals=(arr=[])=>{
+  const seen=new Set((arr||[]).map(s=>(s.ticker||s.symbol||"").toUpperCase()).filter(Boolean));
+  const extras=EXTRA_WATCHLIST_SIGNALS.filter(s=>!seen.has(s.ticker));
+  return [...(arr||[]),...extras];
+};
+
+
+const normalizeBackendSignal=(s,i)=>{
+  const ticker=(s.ticker||s.symbol||"UNK").toUpperCase();
+  const price=Number(s.price||s.close||0);
+  const conviction=Number(s.conviction||s.score||0);
+  const action=(s.action||s.signal||"WATCH").toUpperCase();
+  const entry=price>0?price:Number(s.entry||1);
+  const target=Number(s.target||0)||+(entry*1.02).toFixed(2);
+  const stop=Number(s.stop||0)||+(entry*0.99).toFixed(2);
+  const components=s.components||{};
+  const componentText=Object.keys(components).length?` Components: momentum ${components.momentum??"-"}, volume ${components.volume??"-"}, trend ${components.trend??"-"}, MACD ${components.macd??"-"}, RS ${components.rs??"-"}.`:"";
+  return {
+    id:s.id||`${ticker}-${i}`,
+    ticker,
+    trade_type:s.trade_type||s.tradeType||"",
+    timeframe:s.timeframe||s.interval||"",
+    holding_period:s.holding_period||s.holdingPeriod||"",
+    exit_rule:s.exit_rule||s.exitRule||"",
+    sentiment:s.sentiment||null,
+    type:"CALL",
+    strike:Math.round(entry),
+    expiry:"Scanner",
+    entry:+entry.toFixed(2),
+    target,
+    stop,
+    conviction:+conviction.toFixed(1),
+    strategy:s.strategy||s.model||"MOMENTUM",
+    status:"LIVE",
+    pnl:null,
+    label:action==="BUY"?"BUY":"WATCH",
+    rationale:s.reason||s.rationale||`${ticker} ${action} from KTrade scanner using ${s.strategy||"strategy"}. Price $${entry.toFixed(2)}.${componentText}`
+  };
+};
+const cvColor=c=>c>=90?"#a855f7":c>=80?"#2563eb":c>=70?"#22c55e":"#d97706";
+
+//  HELPERS 
+const Badge=({label,bg="#bfdbfe",fg="#475569"})=>(
+  <span style={{background:bg,color:fg,fontSize:10,fontWeight:700,padding:"2px 7px",borderRadius:99,textTransform:"uppercase",letterSpacing:.5,whiteSpace:"nowrap"}}>{label}</span>
+);
+const Spark=({data,color="#2563eb",w=80,h=28})=>{
+  if(!data||data.length<2)return null;
+  const min=Math.min(...data),max=Math.max(...data),r=max-min||1,p=2;
+  const pts=data.map((v,i)=>`${p+(i/(data.length-1))*(w-p*2)},${p+(1-(v-min)/r)*(h-p*2)}`).join(" ");
+  return <svg width={w} height={h} style={{display:"block"}}><polyline points={pts} fill="none" stroke={color} strokeWidth={1.8} strokeLinejoin="round"/></svg>;
+};
+const Toasts=({list})=>(
+  <div style={{position:"fixed",bottom:16,right:16,zIndex:9999,display:"flex",flexDirection:"column",gap:6,pointerEvents:"none"}}>
+    {list.map(t=>(
+      <div key={t.id} style={{background:t.type==="alert"?"#ef4444":t.type==="ok"?"#dcfce7":"#dbeafe",border:`1px solid ${t.type==="alert"?"#ef4444":t.type==="ok"?"#22c55e":"#2563eb"}`,color:t.type==="alert"?"#ffffff":"#0f172a",padding:"9px 14px",borderRadius:9,fontSize:12,maxWidth:300,animation:"slideIn .25s ease"}}>
+        {t.type==="alert"?"":t.type==="ok"?"":""} {t.msg}
+      </div>
+    ))}
+  </div>
+);
+
+//  BACKEND HOOK 
+const useBackend=()=>{
+  const [connected,setConnected]=useState(false);
+  const [account,setAccount]=useState(null);
+  const [positions,setPositions]=useState([]);
+  const [prices,setPrices]=useState({...DEMO_PRICES});
+  const [orders,setOrders]=useState([]);
+  const [reconciliation,setReconciliation]=useState(null);
+  const [signals,setSignals]=useState(()=>ensureWatchlistSignals(SIGNALS));
+  const [sentiments,setSentiments]=useState({});
+  const [sparks,setSparks]=useState(()=>Object.fromEntries(Object.keys(DEMO_PRICES).map(t=>[t,[DEMO_PRICES[t]]])));
+  const [lastSync,setLastSync]=useState(null);
+  const [mode,setMode]=useState("connecting");
+
+  const fetchSentimentForSignals=useCallback(async(nextSignals)=>{
+    const tickers=[...new Set((nextSignals||[]).slice(0,12).map(s=>s.ticker).filter(Boolean))];
+    tickers.forEach(async(ticker)=>{
+      try{
+        const sig=(nextSignals||[]).find(s=>s.ticker===ticker);
+        const r=await fetch(`${API}/sentiment/${ticker}?signal=${encodeURIComponent(sig?.label||"WATCH")}`,{signal:AbortSignal.timeout(12000)});
+        if(!r.ok)return;
+        const data=await r.json();
+        if(data&&data.available){
+          setSentiments(prev=>({...prev,[ticker]:data}));
+        }
+      }catch(e){}
+    });
+  },[]);
+
+  const fetchAll=useCallback(async()=>{
+    try{
+      const r=await fetch(`${API}/all`,{signal:AbortSignal.timeout(4000)});
+      if(!r.ok)throw new Error("HTTP "+r.status);
+      const d=await r.json();
+      setConnected(true);
+      setMode(d.mode||"paper");
+      if(d.account) setAccount(d.account);
+      if(d.positions!==undefined) setPositions(d.positions);  // update even if empty (all positions closed)
+      if(d.prices&&Object.keys(d.prices).length>0){
+        setPrices(prev=>{
+          const next={...prev,...d.prices};
+          setSparks(s=>{
+            const ns={...s};
+            Object.keys(d.prices).forEach(t=>{
+              const arr=[...(s[t]||[prev[t]||DEMO_PRICES[t]||100]),d.prices[t]];
+              ns[t]=arr.slice(-20);
+            });
+            return ns;
+          });
+          return next;
+        });
+      }
+      if(d.orders) setOrders(d.orders);
+      if(d.reconciliation) setReconciliation(d.reconciliation);
+      if(Array.isArray(d.signals)&&d.signals.length>0){
+        const normalized=d.signals.map(normalizeBackendSignal);
+        const withWatchlist=ensureWatchlistSignals(normalized);
+        setSignals(withWatchlist);
+        fetchSentimentForSignals(withWatchlist);
+      }
+      setLastSync(new Date());
+    }catch(e){
+      setConnected(false);
+      setMode("offline");
+      // Demo mode - simulate price movement
+      setPrices(prev=>{
+        const next={...prev};
+        Object.keys(next).forEach(t=>{next[t]=Math.max(1,+(prev[t]+(Math.random()-.49)*(prev[t]*.004)).toFixed(2));});
+        setSparks(s=>{
+          const ns={...s};
+          Object.keys(next).forEach(t=>{const a=[...(s[t]||[]),next[t]];ns[t]=a.slice(-20);});
+          return ns;
+        });
+        return next;
+      });
+    }
+  },[fetchSentimentForSignals]);
+
+  useEffect(()=>{
+    fetchAll();
+    const iv=setInterval(fetchAll,REFRESH_MS);
+    return()=>clearInterval(iv);
+  },[fetchAll]);
+
+  const placeOrder=useCallback(async(ticker,qty,side,toast)=>{
+    if(!connected){
+      toast(`Demo mode - ${side.toUpperCase()} ${qty}x ${ticker} (not real)`,"ok");
+      return{ok:true,demo:true};
+    }
+    try{
+      const r=await fetch(`${API}/${side}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ticker,qty:parseInt(qty),type:"market"})
+      });
+      const d=await r.json();
+      if(d.ok||d.order){
+        toast(` Paper ${side.toUpperCase()}: ${qty}x ${ticker} @ ~$${(prices[ticker]||0).toFixed(2)}`,"ok");
+        setTimeout(fetchAll,3000);
+        return{ok:true,order:d.order};
+      }
+      toast(`Order blocked: ${d.reason||d.error||"Unknown"}`,"alert");
+      return{ok:false};
+    }catch(e){
+      toast(`Order failed: ${e.message}`,"alert");
+      return{ok:false};
+    }
+  },[connected,prices,fetchAll]);
+
+  const signalsWithSentiment=signals.map(s=>({...s,sentiment:sentiments[s.ticker]||s.sentiment||null}));
+  return{connected,account,positions,prices,orders,reconciliation,signals:signalsWithSentiment,sparks,lastSync,mode,placeOrder,refresh:fetchAll};
+};
+
+//  CONNECTION STATUS BAR 
+const StatusBar=({connected,mode,lastSync,reconciliation,onRefresh})=>{
+  const brokerOk=reconciliation?.ok;
+  const brokerStatus=reconciliation?.status||"UNKNOWN";
+  const brokerWarnings=reconciliation?.warnings||[];
+  return(
+  <div style={{background:connected?"#dcfce7":"#fef2f2",border:`1px solid ${connected?"#22c55e":"#ef4444"}`,borderRadius:8,padding:"8px 14px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+    <div style={{display:"flex",alignItems:"center",gap:8}}>
+      <div style={{width:8,height:8,borderRadius:"50%",background:connected?"#22c55e":"#ef4444",animation:connected?"pulse 2s infinite":"none"}}/>
+      <span style={{color:connected?"#15803d":"#dc2626",fontSize:12,fontWeight:600}}>
+        {connected?`Connected - Alpaca ${mode.toUpperCase()} trading`:"Offline - Demo mode (start backend to connect)"}
+      </span>
+    </div>
+    <div style={{display:"flex",alignItems:"center",gap:10}}>
+      {reconciliation&&connected&&(
+        <span title={brokerWarnings.join(" | ")||"Dashboard positions match broker state"} style={{color:brokerOk?"#15803d":"#d97706",fontSize:11,fontWeight:700,border:`1px solid ${brokerOk?"#22c55e":"#f97316"}`,borderRadius:999,padding:"3px 8px",background:brokerOk?"#dcfce7":"#2a1603"}}>Broker: {brokerStatus}</span>
+      )}
+      {lastSync&&<span style={{color:"#64748b",fontSize:11}}>Synced {lastSync.toLocaleTimeString()}</span>}
+      {!connected&&(
+        <div style={{color:"#475569",fontSize:11,fontFamily:"monospace"}}>
+          Run: python backend\ktrade_alpaca.py
+        </div>
+      )}
+      <button onClick={onRefresh} style={{background:"#eff6ff",border:"1px solid #bfdbfe",color:"#475569",borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:11}}> Sync</button>
+    </div>
+  </div>
+  );
+};
+
+//  POSITIONS TAB (Real Alpaca) 
+const PositionsTab=({positions,account,prices,sparks,placeOrder,toast})=>{
+  const [selling,setSelling]=useState({});
+  const equity=account?parseFloat(account.equity||0):0;
+  const cash=account?parseFloat(account.cash||0):0;
+  const bp=account?parseFloat(account.buying_power||0):0;
+
+  const closePosi=async(ticker,qty)=>{
+    setSelling(s=>({...s,[ticker]:true}));
+    await placeOrder(ticker,qty,"sell",toast);
+    setSelling(s=>({...s,[ticker]:false}));
+  };
+
+  return(
+    <div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:14}}>
+        {[["$"+(equity||0).toLocaleString("en-US",{maximumFractionDigits:0}),"Total Equity","#0f172a"],
+          ["$"+(cash||0).toLocaleString("en-US",{maximumFractionDigits:0}),"Cash","#2563eb"],
+          ["$"+(bp||0).toLocaleString("en-US",{maximumFractionDigits:0}),"Buying Power","#a855f7"]
+        ].map(([v,l,c])=>(
+          <div key={l} style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:9,padding:"12px 13px"}}>
+            <div style={{color:"#64748b",fontSize:9,textTransform:"uppercase"}}>{l}</div>
+            <div style={{color:c,fontWeight:700,fontSize:18,fontFamily:"monospace",marginTop:3}}>{v}</div>
+          </div>
+        ))}
+      </div>
+
+      {positions.length===0?(
+        <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:32,textAlign:"center",color:"#64748b"}}>
+          <div style={{fontSize:32,marginBottom:8}}></div>
+          <div style={{fontSize:14}}>No open positions</div>
+          <div style={{fontSize:12,marginTop:4}}>Place your first paper trade in the Trade tab</div>
+        </div>
+      ):(
+        <div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 70px 80px 90px auto",gap:6,padding:"0 12px",marginBottom:7}}>
+            {["Stock","Chart","Price","P&L",""].map(h=><span key={h} style={{color:"#64748b",fontSize:9,textTransform:"uppercase"}}>{h}</span>)}
+          </div>
+          {positions.map(p=>{
+            const ticker=p.ticker||p.symbol||"";
+            const qty=parseFloat(p.shares||p.qty||0);
+            const avg=parseFloat(p.avgCost||p.avg_entry_price||0);
+            const cur=parseFloat(p.currentPrice||p.current_price||prices[ticker]||avg);
+            const pl=parseFloat(p.unrealizedPL||p.unrealized_pl||(cur-avg)*qty);
+            const plpc=parseFloat(p.unrealizedPLPC||p.unrealized_plpc||(cur-avg)/avg*100);
+            const c=pl>=0?"#22c55e":"#ef4444";
+            return(
+              <div key={ticker} style={{display:"grid",gridTemplateColumns:"1fr 70px 80px 90px auto",gap:6,padding:"11px 13px",background:"#ffffff",borderRadius:9,border:"1px solid #bfdbfe",alignItems:"center",marginBottom:6}}>
+                <div>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <span style={{color:"#0f172a",fontWeight:700,fontSize:13,fontFamily:"monospace"}}>{ticker}</span>
+                    <Badge label={p.sector||"Stock"} bg="#eff6ff" fg="#475569"/>
+                  </div>
+                  <div style={{color:"#64748b",fontSize:10,marginTop:2}}>{qty} shares  avg ${avg.toFixed(2)}</div>
+                </div>
+                <Spark data={sparks[ticker]} color={c} w={70} h={26}/>
+                <div style={{textAlign:"right"}}>
+                  <div style={{color:"#0f172a",fontSize:13,fontFamily:"monospace",fontWeight:600}}>${cur.toFixed(2)}</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{color:c,fontSize:13,fontWeight:700,fontFamily:"monospace"}}>{pl>=0?"+":"-"}${Math.abs(pl).toFixed(0)}</div>
+                  <div style={{color:c,fontSize:10}}>{plpc>=0?"+":""}{plpc.toFixed(1)}%</div>
+                </div>
+                <button onClick={()=>closePosi(ticker,qty)} disabled={selling[ticker]} style={{background:selling[ticker]?"#bfdbfe":"#dc2626",border:"1px solid #ef4444",color:selling[ticker]?"#475569":"#ffffff",borderRadius:7,padding:"5px 10px",cursor:selling[ticker]?"not-allowed":"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>
+                  {selling[ticker]?"...":"Close"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+//  TRADE TAB 
+const TradeTab=({prices,account,orders,placeOrder,toast,connected})=>{
+  const [form,setForm]=useState({ticker:"NVDA",qty:"1",side:"buy"});
+  const [loading,setLoading]=useState(false);
+  const [quotePrice,setQuotePrice]=useState(0);
+  const [quoteLoading,setQuoteLoading]=useState(false);
+  const bp=account?parseFloat(account.buying_power||0):100000;
+  const ticker=(form.ticker||"").toUpperCase().trim();
+  const localPrice=Number(prices[ticker]||DEMO_PRICES[ticker]||0);
+  const price=localPrice||Number(quotePrice||0);
+  const qty=Math.max(1,parseInt(form.qty||"1",10)||1);
+  const cost=price>0?(price*qty):0;
+  const INP={background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:7,color:"#0f172a",padding:"9px 10px",fontSize:13,outline:"none",fontFamily:"monospace",width:"100%"};
+
+  useEffect(()=>{
+    if(!ticker){setQuotePrice(0);return;}
+    if(localPrice>0){setQuotePrice(localPrice);return;}
+    let alive=true;
+    setQuoteLoading(true);
+    fetch(`${API}/quote/${ticker}`,{signal:AbortSignal.timeout(5000)})
+      .then(r=>r.ok?r.json():null)
+      .then(d=>{if(alive&&d&&Number(d.price)>0)setQuotePrice(Number(d.price));})
+      .catch(()=>{})
+      .finally(()=>{if(alive)setQuoteLoading(false);});
+    return()=>{alive=false};
+  },[ticker,localPrice]);
+
+  const submit=async()=>{
+    if(!form.ticker||!form.qty)return;
+    setLoading(true);
+    await placeOrder(ticker,qty,form.side,toast);
+    setLoading(false);
+  };
+
+  return(
+    <div>
+      {!connected&&(
+        <div style={{background:"#fef2f2",border:"1px solid #ef4444",borderRadius:9,padding:12,marginBottom:12,color:"#dc2626",fontSize:12}}>
+           Backend offline  trades will be simulated only. Start backend for real Alpaca paper trades.
+        </div>
+      )}
+
+      {/* Order form */}
+      <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:16,marginBottom:14}}>
+        <div style={{color:"#0f172a",fontWeight:700,fontSize:15,marginBottom:14}}>
+          {connected?" Place Paper Trade":" Simulate Trade"}
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+          <div>
+            <div style={{color:"#475569",fontSize:11,marginBottom:5}}>Ticker</div>
+            <input value={form.ticker} onChange={e=>setForm(f=>({...f,ticker:e.target.value.toUpperCase()}))} style={INP} placeholder="NVDA"/>
+          </div>
+          <div>
+            <div style={{color:"#475569",fontSize:11,marginBottom:5}}>Shares</div>
+            <input type="number" min="1" value={form.qty} onChange={e=>setForm(f=>({...f,qty:e.target.value}))} style={INP} placeholder="1"/>
+          </div>
+        </div>
+
+        <div style={{marginBottom:14}}>
+          <div style={{color:"#475569",fontSize:11,marginBottom:5}}>Side</div>
+          <div style={{display:"flex",gap:8}}>
+            {["buy","sell"].map(s=>(
+              <button key={s} onClick={()=>setForm(f=>({...f,side:s}))} style={{flex:1,background:form.side===s?(s==="buy"?"#dcfce7":"#dc2626"):"#eff6ff",border:`1px solid ${form.side===s?(s==="buy"?"#22c55e":"#ef4444"):"#bfdbfe"}`,color:form.side===s?(s==="buy"?"#15803d":"#ffffff"):"#475569",borderRadius:7,padding:"9px 0",cursor:"pointer",fontWeight:700,fontSize:13,textTransform:"uppercase"}}>{s==="buy"?" BUY":" SELL"}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Order preview */}
+        <div style={{background:"#eff6ff",borderRadius:8,padding:12,marginBottom:14}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+            {[["Market Price",price?`$${price.toFixed(2)}`:(quoteLoading?"Loading...":"--"),"#0f172a"],
+              ["Est. Cost",cost?`$${cost.toLocaleString("en-US",{maximumFractionDigits:2})}`:(quoteLoading?"Loading...":"--"),"#0f172a"],
+              ["Buying Power",`$${bp.toLocaleString("en-US",{maximumFractionDigits:0})}`,"#2563eb"]
+            ].map(([l,v,c])=>(
+              <div key={l}>
+                <div style={{color:"#64748b",fontSize:10}}>{l}</div>
+                <div style={{color:c,fontWeight:700,fontSize:14,fontFamily:"monospace"}}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button onClick={submit} disabled={loading||!form.ticker||!form.qty} style={{width:"100%",background:loading?"#bfdbfe":form.side==="buy"?"#22c55e":"#ef4444",border:`1px solid ${form.side==="buy"?"#22c55e":"#ef4444"}`,color:loading?"#475569":form.side==="buy"?"#15803d":"#ffffff",borderRadius:8,padding:"12px 0",cursor:loading?"not-allowed":"pointer",fontWeight:700,fontSize:14}}>
+          {loading?"Placing order...":connected?`Place Paper ${form.side.toUpperCase()} ${qty}x ${ticker||"..."}${cost?` · Est. $${cost.toLocaleString("en-US",{maximumFractionDigits:2})}`:""}`:`Simulate ${form.side.toUpperCase()} ${qty}x ${ticker||"..."}${cost?` · Est. $${cost.toLocaleString("en-US",{maximumFractionDigits:2})}`:""}`}
+        </button>
+      </div>
+
+      {/* Quick trade buttons from signals */}
+      <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:14,marginBottom:14}}>
+        <div style={{color:"#475569",fontSize:10,textTransform:"uppercase",letterSpacing:.8,marginBottom:10}}>Quick Trade from Signals</div>
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {SIGNALS.filter(s=>s.status==="LIVE"&&s.label==="BUY").map(s=>(
+            <div key={s.id} style={{display:"flex",alignItems:"center",gap:10,background:"#eff6ff",borderRadius:8,padding:"10px 12px"}}>
+              <div style={{flex:1}}>
+                <span style={{color:"#0f172a",fontWeight:700,fontFamily:"monospace"}}>{s.ticker}</span>
+                <span style={{color:"#475569",fontSize:11,marginLeft:8}}>{s.strategy}  cv={s.conviction}</span>
+              </div>
+              <span style={{color:"#1d4ed8",fontSize:11,fontFamily:"monospace"}}>entry ${s.entry}  ${s.target}</span>
+              <button onClick={()=>{setForm({ticker:s.ticker,qty:"1",side:"buy"});}} style={{background:"#dcfce7",border:"1px solid #22c55e",color:"#15803d",borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:11,fontWeight:600}}>Set</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent orders */}
+      {orders.length>0&&(
+        <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:14}}>
+          <div style={{color:"#475569",fontSize:10,textTransform:"uppercase",letterSpacing:.8,marginBottom:10}}>Recent Orders (Alpaca)</div>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {orders.slice(0,8).map((o,i)=>{
+              const ticker=o.ticker||o.symbol||"";
+              const fill=parseFloat(o.filled_avg||o.filled_avg_price||0);
+              const status=o.status||"";
+              const side=o.side||"";
+              return(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 11px",background:"#eff6ff",borderRadius:7}}>
+                  <Badge label={side.toUpperCase()} bg={side==="buy"?"#dcfce7":"#dc2626"} fg={side==="buy"?"#15803d":"#ffffff"}/>
+                  <span style={{color:"#0f172a",fontWeight:700,fontFamily:"monospace",fontSize:12}}>{ticker}</span>
+                  <span style={{color:"#475569",fontSize:11}}>{o.qty||o.filled_qty} shares</span>
+                  <div style={{flex:1}}/>
+                  <span style={{color:status==="filled"?"#22c55e":status==="canceled"?"#ef4444":"#d97706",fontSize:11,fontFamily:"monospace"}}>{status}</span>
+                  {fill>0&&<span style={{color:"#475569",fontSize:11,fontFamily:"monospace"}}>${fill.toFixed(2)}</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+//  TRADE HISTORY TAB
+const TRADE_HISTORY_FALLBACK=[]
+
+const fmtTradeTime=(v)=>{
+  if(!v)return "-";
+  const d=new Date(v);
+  if(Number.isNaN(d.getTime()))return String(v);
+  return d.toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+};
+const normalizeTradeRow=(r,i=0,source="backend")=>{
+  const ticker=(r.ticker||r.symbol||"UNK").toUpperCase();
+  const entry=Number(r.entry??r.entry_price??r.buy_price??r.avg_entry_price??r.filled_avg??r.filled_avg_price??0);
+  const exit=Number(r.exit??r.exit_price??r.sell_price??r.close_price??r.limit_price??entry??0);
+  const qty=Number(r.qty??r.filled_qty??r.shares??0);
+  const pnl=Number(r.pnl??r.realized_pnl??r.pl??((exit-entry)*qty)??0);
+  const side=(r.side||"BUY").toUpperCase();
+  const entryTime=r.entry_time||r.opened_at||r.created_at||r.date||"";
+  const exitTime=r.exit_time||r.closed_at||r.filled_at||r.updated_at||r.date||entryTime;
+  return {
+    id:r.id||`${source}-${ticker}-${i}-${entryTime}-${exitTime}`,
+    date:fmtTradeTime(exitTime||entryTime),
+    ticker,side,qty,entry,exit,pl:pnl,
+    status:r.status||"closed",
+    entry_time:entryTime,
+    exit_time:exitTime,
+    verified:r.verified===undefined?source==="backend":!!r.verified,
+    reason:r.reason||r.rationale||r.description||(source==="backend"?"real fill from Alpaca closed trade history":"demo/order fallback"),
+    source
+  };
+};
+const calcTradeStats=(rows=[])=>{
+  const total=rows.length;
+  const wins=rows.filter(r=>Number(r.pl)>0).length;
+  const losses=rows.filter(r=>Number(r.pl)<0).length;
+  const flat=total-wins-losses;
+  const pnl=rows.reduce((s,r)=>s+Number(r.pl||0),0);
+  const grossWin=rows.filter(r=>Number(r.pl)>0).reduce((s,r)=>s+Number(r.pl||0),0);
+  const grossLoss=Math.abs(rows.filter(r=>Number(r.pl)<0).reduce((s,r)=>s+Number(r.pl||0),0));
+  return {total,wins,losses,flat,pnl,grossWin,grossLoss,winRate:total?wins/total*100:0,profitFactor:grossLoss?grossWin/grossLoss:null,avgPnl:total?pnl/total:0};
+};
+const useClosedTradeHistory=(orders=[])=>{
+  const [rows,setRows]=useState([]);
+  const [stats,setStats]=useState(null);
+  const [source,setSource]=useState("loading");
+  const [error,setError]=useState("");
+  useEffect(()=>{
+    let alive=true;
+    const orderRows=(orders||[])
+      .filter(o=>o.status==="filled"||o.status==="closed"||Number(o.filled_qty||0)>0)
+      .map((o,i)=>normalizeTradeRow(o,i,"orders"));
+    const load=async()=>{
+      try{
+        const r=await fetch(`${API}/closed_trades`,{signal:AbortSignal.timeout(7000)});
+        const d=await r.json();
+        if(!alive)return;
+        const backendRows=Array.isArray(d?.trades)?d.trades.map((x,i)=>normalizeTradeRow(x,i,"backend")):[];
+        if(backendRows.length){
+          setRows(backendRows);
+          setStats(d?.stats||calcTradeStats(backendRows));
+          setSource("backend /closed_trades");
+          setError("");
+        }else if(orderRows.length){
+          setRows(orderRows);setStats(calcTradeStats(orderRows));setSource("backend /orders");setError(d?.error||"");
+        }else{
+          const demoRows=TRADE_HISTORY_FALLBACK.map((x,i)=>normalizeTradeRow(x,i,"demo"));
+          setRows(demoRows);setStats(calcTradeStats(demoRows));setSource("demo fallback");setError(d?.error||"");
+        }
+      }catch(e){
+        if(!alive)return;
+        if(orderRows.length){setRows(orderRows);setStats(calcTradeStats(orderRows));setSource("backend /orders");setError(e.message);}
+        else{const demoRows=TRADE_HISTORY_FALLBACK.map((x,i)=>normalizeTradeRow(x,i,"demo"));setRows(demoRows);setStats(calcTradeStats(demoRows));setSource("demo fallback");setError(e.message);}
+      }
+    };
+    load();
+    return()=>{alive=false;};
+  },[orders]);
+  return {rows,stats,source,error};
+};
+
+const TradeHistoryTab=({orders=[]})=>{
+  const [tickerFilter,setTickerFilter]=useState("ALL");
+  const [sideFilter,setSideFilter]=useState("ALL");
+  const [rangeFilter,setRangeFilter]=useState("8W");
+  const [selected,setSelected]=useState(null);
+  const {rows,stats,source,error}=useClosedTradeHistory(orders);
+  const tickers=["ALL",...Array.from(new Set(rows.map(r=>r.ticker))).sort()];
+  const now=Date.now();
+  const filtered=rows.filter(r=>{
+    const t=Date.parse(r.exit_time||r.entry_time||"");
+    const ageDays=Number.isNaN(t)?0:(now-t)/86400000;
+    const rangeOk=rangeFilter==="TODAY"?ageDays<1:rangeFilter==="1W"?ageDays<=7:ageDays<=56||Number.isNaN(t)||!t;
+    return rangeOk&&(tickerFilter==="ALL"||r.ticker===tickerFilter)&&(sideFilter==="ALL"||r.side===sideFilter);
+  });
+  const filteredStats=calcTradeStats(filtered);
+  const exportCsv=()=>{
+    const header=["date","ticker","side","qty","buy_entry","sell_exit","pnl","status","verified","source","description"];
+    const csv=[header.join(","),...filtered.map(r=>[r.date,r.ticker,r.side,r.qty,r.entry,r.exit,r.pl,r.status,r.verified,r.source,r.reason].map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(","))].join("\n");
+    const blob=new Blob([csv],{type:"text/csv"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download="ktrade_trade_history.csv";a.click();URL.revokeObjectURL(url);
+  };
+  const selectStyle={background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:7,color:"#0f172a",padding:"8px 10px",fontSize:12,fontWeight:600,outline:"none"};
+  return(
+    <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,overflow:"hidden"}}>
+      <div style={{padding:"14px",display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap",borderBottom:"1px solid #bfdbfe"}}>
+        <div>
+          <div style={{color:"#0f172a",fontWeight:800,fontSize:16}}>Trade History</div>
+          <div style={{color:"#64748b",fontSize:12,marginTop:2}}>Uses real backend <b>{source}</b>. Click any row/date to see buy price, sell price, P&L and fill description.</div>
+          {error&&<div style={{color:"#dc2626",fontSize:11,marginTop:3}}>Backend note: {error}</div>}
+        </div>
+        <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
+          <select value={tickerFilter} onChange={e=>setTickerFilter(e.target.value)} style={selectStyle}>{tickers.map(t=><option key={t} value={t}>{t==="ALL"?"All tickers":t}</option>)}</select>
+          <select value={rangeFilter} onChange={e=>setRangeFilter(e.target.value)} style={selectStyle}><option value="8W">Last 8 weeks</option><option value="1W">Last 7 days</option><option value="TODAY">Today</option></select>
+          <select value={sideFilter} onChange={e=>setSideFilter(e.target.value)} style={selectStyle}><option value="ALL">All sides</option><option value="BUY">Buy/Long</option><option value="SELL">Sell/Short</option></select>
+          <button onClick={exportCsv} style={{background:"#2563eb",border:"1px solid #2563eb",color:"#fff",borderRadius:7,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700}}>Export CSV</button>
+        </div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,padding:"12px 14px",borderBottom:"1px solid #bfdbfe",background:"#f8fafc"}}>
+        {[[filteredStats.total,"Closed Trades"],[`${filteredStats.winRate.toFixed(1)}%`,"Success Rate"],[(filteredStats.pnl>=0?"+$":"-$")+Math.abs(filteredStats.pnl).toFixed(2),"Total P&L"],[filteredStats.profitFactor?filteredStats.profitFactor.toFixed(2):"-","Profit Factor"]].map(([v,l])=>(
+          <div key={l} style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:8,padding:"9px 11px"}}><div style={{fontWeight:900,fontFamily:"monospace",fontSize:15,color:"#0f172a"}}>{v}</div><div style={{fontSize:10,color:"#64748b",textTransform:"uppercase"}}>{l}</div></div>
+        ))}
+      </div>
+      <div style={{overflowX:"auto"}}>
+        <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+          <thead>
+            <tr style={{background:"#eff6ff",color:"#475569",textTransform:"uppercase",fontSize:10,letterSpacing:.5}}>
+              {["Date","Ticker","Side","Qty","Buy/Entry","Sell/Exit","P&L","Status"].map(h=><th key={h} style={{textAlign:"left",padding:"10px 12px",borderBottom:"1px solid #bfdbfe"}}>{h}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((r,i)=>{
+              const profit=Number(r.pl)>=0;
+              const isOpen=selected===r.id;
+              return <React.Fragment key={r.id||i}>
+                <tr onClick={()=>setSelected(isOpen?null:r.id)} style={{background:isOpen?"#dbeafe":i%2?"#f8fafc":"#ffffff",borderBottom:"1px solid #e2e8f0",cursor:"pointer"}} title="Click for full trade details">
+                  <td style={{padding:"11px 12px",color:"#0f172a",fontWeight:700,whiteSpace:"nowrap"}}>{r.date}</td>
+                  <td style={{padding:"11px 12px",color:"#0f172a",fontWeight:800,fontFamily:"monospace"}}>{r.ticker}</td>
+                  <td style={{padding:"11px 12px"}}><Badge label={r.side} bg={r.side==="BUY"?"#dcfce7":"#fee2e2"} fg={r.side==="BUY"?"#15803d":"#dc2626"}/></td>
+                  <td style={{padding:"11px 12px",fontWeight:700}}>{r.qty}</td>
+                  <td style={{padding:"11px 12px",fontFamily:"monospace",fontWeight:700}}>${Number(r.entry||0).toFixed(2)}</td>
+                  <td style={{padding:"11px 12px",fontFamily:"monospace",fontWeight:700}}>${Number(r.exit||0).toFixed(2)}</td>
+                  <td style={{padding:"11px 12px",fontFamily:"monospace",fontWeight:800,color:profit?"#16a34a":"#dc2626"}}>{profit?"$":"-$"}{Math.abs(Number(r.pl||0)).toFixed(2)}</td>
+                  <td style={{padding:"11px 12px"}}><Badge label={r.verified?"verified":"fallback"} bg={r.verified?"#dcfce7":"#e2e8f0"} fg={r.verified?"#15803d":"#475569"}/></td>
+                </tr>
+                {isOpen&&<tr><td colSpan="8" style={{padding:"12px 14px",background:"#eff6ff",borderBottom:"1px solid #bfdbfe"}}>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:8}}>
+                    <div><b>Buy/Entry:</b> ${Number(r.entry||0).toFixed(2)}<br/><span style={{color:"#64748b"}}>{fmtTradeTime(r.entry_time)}</span></div>
+                    <div><b>Sell/Exit:</b> ${Number(r.exit||0).toFixed(2)}<br/><span style={{color:"#64748b"}}>{fmtTradeTime(r.exit_time)}</span></div>
+                    <div><b>Quantity:</b> {r.qty}<br/><b>P&L:</b> <span style={{color:profit?"#16a34a":"#dc2626",fontWeight:800}}>{profit?"+$":"-$"}{Math.abs(Number(r.pl||0)).toFixed(2)}</span></div>
+                    <div><b>Source:</b> {r.source}<br/><b>Status:</b> {r.status}</div>
+                  </div>
+                  <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:7,padding:"9px 11px",color:"#334155"}}><b>Description:</b> {r.reason}</div>
+                </td></tr>}
+              </React.Fragment>;
+            })}
+          </tbody>
+        </table>
+      </div>
+      {filtered.length===0&&<div style={{padding:26,textAlign:"center",color:"#64748b"}}>No trades match the selected filters.</div>}
+    </div>
+  );
+};
+
+//  ALERTS TAB 
+const AlertsTab=({prices,toast})=>{
+  const [list,setList]=useState([
+    {id:1,ticker:"NVDA",type:"above",price:140,triggered:false},
+    {id:2,ticker:"TSLA",type:"below",price:220,triggered:false},
+    {id:3,ticker:"QQQ",type:"above",price:485,triggered:false},
+    {id:4,ticker:"QNT",type:"above",price:105,triggered:false},
+  ]);
+  const [f,setF]=useState({ticker:"NVDA",type:"above",price:""});
+  const INP={background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:7,color:"#0f172a",padding:"8px 10px",fontSize:12,outline:"none",fontFamily:"monospace"};
+  useEffect(()=>{
+    setList(prev=>prev.map(a=>{
+      if(a.triggered)return a;
+      const p=prices[a.ticker];if(!p)return a;
+      const hit=a.type==="above"?p>=a.price:p<=a.price;
+      if(hit){toast(`${a.ticker} ${a.type==="above"?" above":" below"} $${a.price}!`,"alert");return{...a,triggered:true};}
+      return a;
+    }));
+  },[prices]);
+  const add=()=>{if(!f.price)return;setList(l=>[...l,{...f,id:Date.now(),price:parseFloat(f.price),triggered:false}]);toast(`Alert set: ${f.ticker} ${f.type} $${f.price}`,"ok");setF(x=>({...x,price:""}));};
+  return(
+    <div>
+      <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:14,marginBottom:12}}>
+        <div style={{color:"#475569",fontSize:10,textTransform:"uppercase",letterSpacing:.8,marginBottom:10}}>New Alert</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:7}}>
+          <input value={f.ticker} onChange={e=>setF(x=>({...x,ticker:e.target.value.toUpperCase()}))} style={INP} placeholder="NVDA"/>
+          <select value={f.type} onChange={e=>setF(x=>({...x,type:e.target.value}))} style={INP}><option value="above">Above </option><option value="below">Below </option></select>
+          <input placeholder="Price" type="number" value={f.price} onChange={e=>setF(x=>({...x,price:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&add()} style={INP}/>
+          <button onClick={add} style={{background:"#2563eb",color:"#fff",border:"none",borderRadius:7,padding:"0 14px",cursor:"pointer",fontWeight:700}}>+ Set</button>
+        </div>
+      </div>
+      {list.map(a=>{
+        const cur=prices[a.ticker]||0;
+        const away=cur?((a.type==="above"?a.price-cur:cur-a.price)/cur*100).toFixed(1):"--";
+        return(
+          <div key={a.id} style={{background:"#ffffff",border:`1px solid ${a.triggered?"#ef4444":"#bfdbfe"}`,borderRadius:9,padding:"11px 13px",display:"flex",alignItems:"center",gap:10,marginBottom:7}}>
+            <span style={{fontSize:16}}>{a.triggered?"":""}</span>
+            <div style={{flex:1}}>
+              <div style={{display:"flex",alignItems:"center",gap:7}}>
+                <span style={{color:"#0f172a",fontWeight:700,fontFamily:"monospace"}}>{a.ticker}</span>
+                <span style={{color:"#475569",fontSize:12}}>{a.type} ${a.price}</span>
+                {a.triggered&&<Badge label="TRIGGERED" bg="#ef4444" fg="#ffffff"/>}
+              </div>
+              {!a.triggered&&<div style={{color:"#64748b",fontSize:11,marginTop:2}}>Now ${cur.toFixed(2)}  {parseFloat(away)>0?away+"% away":" in range"}</div>}
+            </div>
+            <button onClick={()=>setList(l=>l.filter(x=>x.id!==a.id))} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:17}}></button>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+//  SIGNALS TAB 
+const SignalsTab=({prices,signals})=>{
+  const [filter,setFilter]=useState("ALL");
+  const [open,setOpen]=useState(null);
+  const sourceSignals=(signals&&signals.length)?signals:SIGNALS;
+  const live=sourceSignals.filter(s=>s.status==="LIVE");
+  const buys=live.filter(s=>s.label==="BUY");
+  const watches=live.filter(s=>s.label==="WATCH");
+  const usd=n=>"$"+Math.abs(n).toFixed(2);
+  const filtered=filter==="ALL"?sourceSignals:filter==="BUY"?sourceSignals.filter(s=>s.label==="BUY"):filter==="WATCH"?sourceSignals.filter(s=>s.label==="WATCH"):filter==="CLOSED"?sourceSignals.filter(s=>s.status==="CLOSED"):sourceSignals.filter(s=>s.type===filter);
+  return(
+    <div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>
+        {[[buys.length+" BUY","Buy Signals","#22c55e"],[watches.length+" WATCH","Watch","#d97706"],[Math.round(live.reduce((s,x)=>s+x.conviction,0)/live.length||0)+"%","Avg CV","#a855f7"],["50%","Win Rate","#2563eb"]].map(([v,l,c])=>(
+          <div key={l} style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:9,padding:"10px 12px"}}>
+            <div style={{color:"#64748b",fontSize:9,textTransform:"uppercase"}}>{l}</div>
+            <div style={{color:c,fontWeight:700,fontSize:16,fontFamily:"monospace",marginTop:3}}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
+        {["ALL","BUY","WATCH","CLOSED","CALL","PUT"].map(f=>(
+          <button key={f} onClick={()=>setFilter(f)} style={{background:filter===f?(f==="BUY"?"#dcfce7":f==="WATCH"?"#fff7ed":"#2563eb"):"#ffffff",border:`1px solid ${filter===f?(f==="BUY"?"#22c55e":f==="WATCH"?"#d97706":"#2563eb"):"#bfdbfe"}`,color:filter===f?(f==="BUY"?"#22c55e":f==="WATCH"?"#d97706":"#fff"):"#475569",borderRadius:99,padding:"4px 11px",cursor:"pointer",fontSize:11,fontWeight:600}}>{f}</button>
+        ))}
+      </div>
+      {filtered.map(sig=>{
+        const isCall=sig.type==="CALL";
+        const px=prices[sig.ticker]||100;
+        const est=sig.status==="LIVE"?+(sig.entry*(1+(px-(prices[sig.ticker]||px))/(prices[sig.ticker]||px)*(isCall?1:-1)*1.8)).toFixed(2):null;
+        const isWatch=sig.label==="WATCH";
+        const isOpen=open===sig.id;
+        return(
+          <div key={sig.id} style={{background:"#ffffff",border:`1px solid ${isWatch?"#fff7ed":"#bfdbfe"}`,borderLeft:`3px solid ${sig.status==="LIVE"?cvColor(sig.conviction):"#64748b"}`,borderRadius:11,overflow:"hidden",marginBottom:9}}>
+            <div style={{padding:"13px 15px",cursor:"pointer"}} onClick={()=>setOpen(isOpen?null:sig.id)}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:9}}>
+                  <div style={{background:"#eff6ff",borderRadius:7,padding:"5px 9px",textAlign:"center",minWidth:52}}>
+                    <div style={{color:"#0f172a",fontWeight:800,fontSize:14,fontFamily:"monospace"}}>{sig.ticker}</div>
+                    <div style={{color:isCall?"#22c55e":"#ef4444",fontSize:10,fontWeight:700}}>{sig.type}</div>
+                  </div>
+                  <div>
+                    <div style={{color:"#0f172a",fontWeight:600,fontSize:13}}>${sig.strike}  {sig.expiry}</div>
+                    <div style={{display:"flex",gap:5,marginTop:4,flexWrap:"wrap"}}>
+                      {sig.trade_type&&<Badge label={sig.trade_type} bg={sig.trade_type==="INTRADAY"?"#065f46":"#1e3a8a"} fg={sig.trade_type==="INTRADAY"?"#047857":"#bfdbfe"}/>}
+                      {sig.timeframe&&<Badge label={sig.timeframe} bg="#eff6ff" fg="#2563eb"/>}
+                      <Badge label={sig.strategy} bg="#dbeafe" fg="#1d4ed8"/>
+                      {sig.status==="LIVE"?<Badge label={` ${sig.label}`} bg={sig.label==="BUY"?"#dcfce7":"#fff7ed"} fg={sig.label==="BUY"?"#15803d":"#d97706"}/>:<Badge label={sig.pnl>=0?"WIN ":"LOSS "} bg={sig.pnl>=0?"#dcfce7":"#dc2626"} fg={sig.pnl>=0?"#15803d":"#ffffff"}/>}
+                      {sig.sentiment&&<Badge label={`AI ${sig.sentiment.sentiment} ${sig.sentiment.score}`} bg={sig.sentiment.sentiment==="positive"?"#dcfce7":sig.sentiment.sentiment==="negative"?"#dc2626":"#bfdbfe"} fg={sig.sentiment.sentiment==="positive"?"#15803d":sig.sentiment.sentiment==="negative"?"#ffffff":"#1e293b"}/>}
+                    </div>
+                  </div>
+                </div>
+                <div style={{textAlign:"center"}}>
+                  <div style={{width:34,height:34,borderRadius:"50%",border:`2px solid ${cvColor(sig.conviction)}`,display:"flex",alignItems:"center",justifyContent:"center",background:"#0a0a1a"}}>
+                    <span style={{color:cvColor(sig.conviction),fontSize:11,fontWeight:800}}>{sig.conviction}</span>
+                  </div>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
+                {[["Entry",usd(sig.entry),"#475569"],["Target",usd(sig.target),"#22c55e"],["Stop",usd(sig.stop),"#ef4444"],
+                  sig.status==="LIVE"?["Live Est",est?usd(est):"-",est&&est>sig.entry?"#22c55e":"#ef4444"]:["P&L",sig.pnl!=null?(sig.pnl>=0?"+$"+sig.pnl:"-$"+Math.abs(sig.pnl)):"-",sig.pnl>=0?"#22c55e":"#ef4444"]
+                ].map(([l,v,c])=>(
+                  <div key={l} style={{background:"#eff6ff",borderRadius:7,padding:"7px 8px"}}>
+                    <div style={{color:"#64748b",fontSize:9,textTransform:"uppercase"}}>{l}</div>
+                    <div style={{color:c,fontWeight:700,fontSize:13,fontFamily:"monospace",marginTop:2}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              {isWatch&&<div style={{marginTop:8,color:"#d97706",fontSize:11}}> WATCH  Conviction {sig.conviction}/100. Not ready to enter yet.</div>}
+            </div>
+            {isOpen&&(
+              <div style={{borderTop:"1px solid #bfdbfe",padding:"11px 15px",background:"#080d14"}}>
+                <p style={{color:"#1e293b",fontSize:12,lineHeight:1.6,margin:"0 0 10px"}}>{sig.rationale}</p>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7,marginBottom:7}}>
+                  <div style={{background:"#f8fafc",borderRadius:7,padding:"7px 10px"}}><div style={{color:"#64748b",fontSize:9}}>TRADE TYPE</div><div style={{color:"#047857",fontWeight:700,fontSize:13,fontFamily:"monospace"}}>{sig.trade_type||"-"}</div></div>
+                  <div style={{background:"#f8fafc",borderRadius:7,padding:"7px 10px"}}><div style={{color:"#64748b",fontSize:9}}>TIMEFRAME</div><div style={{color:"#2563eb",fontWeight:700,fontSize:13,fontFamily:"monospace"}}>{sig.timeframe||"-"}</div></div>
+                  <div style={{background:"#f8fafc",borderRadius:7,padding:"7px 10px"}}><div style={{color:"#64748b",fontSize:9}}>HOLD</div><div style={{color:"#f59e0b",fontWeight:700,fontSize:13,fontFamily:"monospace"}}>{sig.holding_period||"-"}</div></div>
+                </div>
+                {sig.exit_rule&&<div style={{background:"#f8fafc",borderRadius:7,padding:"7px 10px",marginBottom:7}}><div style={{color:"#64748b",fontSize:9}}>EXIT RULE</div><div style={{color:"#1e293b",fontWeight:600,fontSize:12}}>{sig.exit_rule}</div></div>}
+                {sig.sentiment&&<div style={{background:"#07131f",border:"1px solid #164e63",borderRadius:7,padding:"8px 10px",marginBottom:7}}>
+                  <div style={{color:"#67e8f9",fontSize:9,textTransform:"uppercase",letterSpacing:.6}}>AI Sentiment Confirmation</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap",margin:"5px 0"}}>
+                    <Badge label={`${sig.sentiment.sentiment} ${sig.sentiment.score}/100`} bg={sig.sentiment.sentiment==="positive"?"#dcfce7":sig.sentiment.sentiment==="negative"?"#dc2626":"#bfdbfe"} fg={sig.sentiment.sentiment==="positive"?"#15803d":sig.sentiment.sentiment==="negative"?"#ffffff":"#1e293b"}/>
+                    <Badge label={`confidence ${sig.sentiment.confidence}`} bg="#eff6ff" fg="#2563eb"/>
+                    <Badge label={sig.sentiment.finbert_used?"FinBERT":"keyword fallback"} bg="#dbeafe" fg="#c4b5fd"/>
+                    {sig.sentiment.openai_used&&<Badge label="OpenAI explanation" bg="#065f46" fg="#047857"/>}
+                  </div>
+                  <div style={{color:"#1e293b",fontSize:12,lineHeight:1.5}}>{sig.sentiment.reason}</div>
+                  <div style={{color:"#f59e0b",fontSize:11,marginTop:5}}>{sig.sentiment.warning}</div>
+                </div>}
+                <div style={{display:"flex",gap:7}}>
+                  <div style={{background:"#f8fafc",borderRadius:7,padding:"7px 10px",flex:1}}><div style={{color:"#64748b",fontSize:9}}>R/R</div><div style={{color:"#1d4ed8",fontWeight:700,fontSize:13,fontFamily:"monospace"}}>1:{((sig.target-sig.entry)/(sig.entry-sig.stop)).toFixed(1)}</div></div>
+                  <div style={{background:"#f8fafc",borderRadius:7,padding:"7px 10px",flex:1}}><div style={{color:"#64748b",fontSize:9}}>MAX LOSS</div><div style={{color:"#ef4444",fontWeight:700,fontSize:13,fontFamily:"monospace"}}>${(sig.stop*100).toFixed(0)}</div></div>
+                  <div style={{background:"#f8fafc",borderRadius:7,padding:"7px 10px",flex:1}}><div style={{color:"#64748b",fontSize:9}}>TARGET GAIN</div><div style={{color:"#22c55e",fontWeight:700,fontSize:13,fontFamily:"monospace"}}>${(sig.target*100).toFixed(0)}</div></div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+//  PERFORMANCE TAB
+const PerfTab=({account,positions,prices,orders=[]})=>{
+  const equity=account?parseFloat(account.equity||0):100000;
+  const startEquity=100000;
+  const totalReturn=((equity-startEquity)/startEquity*100);
+  const {rows,stats,source,error}=useClosedTradeHistory(orders);
+  const [sub,setSub]=useState("success");
+  // Always calculate display stats from normalized rows. Backend stats can use different field names,
+  // which caused the Performance tab to crash/blank when fields like winRate were missing.
+  const tradeStats=calcTradeStats(rows);
+  const closed=SIGNALS.filter(s=>s.status==="CLOSED");
+  const signalWins=closed.filter(s=>s.pnl>0);
+  const spnl=closed.reduce((s,x)=>s+(x.pnl||0),0);
+  const pnlRows=[...rows].sort((a,b)=>Number(Date.parse(b.exit_time||b.entry_time||0))-Number(Date.parse(a.exit_time||a.entry_time||0)));
+  const byTicker=pnlRows.reduce((acc,r)=>{const k=r.ticker||"UNK";acc[k]=acc[k]||{ticker:k,trades:0,pnl:0,wins:0,losses:0};acc[k].trades+=1;acc[k].pnl+=Number(r.pl||0);if(Number(r.pl)>0)acc[k].wins+=1;if(Number(r.pl)<0)acc[k].losses+=1;return acc;},{});
+  const tickerRows=Object.values(byTicker).sort((a,b)=>b.pnl-a.pnl);
+  const pill=(id,label)=><button onClick={()=>setSub(id)} style={{background:sub===id?"#2563eb":"#ffffff",color:sub===id?"#fff":"#475569",border:`1px solid ${sub===id?"#2563eb":"#bfdbfe"}`,borderRadius:999,padding:"7px 13px",fontWeight:800,cursor:"pointer",fontSize:12}}>{label}</button>;
+  const card=(v,l,c="#0f172a")=><div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:9,padding:"12px 13px"}}><div style={{color:"#64748b",fontSize:9,textTransform:"uppercase"}}>{l}</div><div style={{color:c,fontWeight:800,fontSize:17,fontFamily:"monospace",marginTop:3}}>{v}</div></div>;
+  return(
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
+        <div>
+          <div style={{fontWeight:900,fontSize:18,color:"#0f172a"}}>Performance</div>
+          <div style={{fontSize:12,color:"#64748b"}}>Previous-trade analytics from <b>{source}</b>. This does not change auto-trade logic.</div>
+          {error&&<div style={{fontSize:11,color:"#dc2626",marginTop:2}}>Backend note: {error}</div>}
+        </div>
+        <div style={{display:"flex",gap:6}}>{pill("success","App Success Rate")}{pill("pnl","P&L on All Trades")}</div>
+      </div>
+      {sub==="success"?(
+        <div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}}>
+            {card(`${tradeStats.winRate.toFixed(1)}%`,"App Success Rate",tradeStats.winRate>=50?"#16a34a":"#dc2626")}
+            {card(`${tradeStats.wins}/${tradeStats.total}`,"Wins / Total", "#2563eb")}
+            {card(tradeStats.profitFactor?tradeStats.profitFactor.toFixed(2):"-","Profit Factor", "#a855f7")}
+            {card((tradeStats.avgPnl>=0?"+$":"-$")+Math.abs(tradeStats.avgPnl).toFixed(2),"Avg P&L / Trade",tradeStats.avgPnl>=0?"#16a34a":"#dc2626")}
+          </div>
+          <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:14,marginBottom:12}}>
+            <div style={{color:"#475569",fontSize:10,textTransform:"uppercase",letterSpacing:.8,marginBottom:12}}>Success Breakdown</div>
+            <div style={{height:14,display:"flex",borderRadius:999,overflow:"hidden",background:"#e2e8f0",marginBottom:10}}>
+              <div style={{width:`${tradeStats.total?tradeStats.wins/tradeStats.total*100:0}%`,background:"#16a34a"}}/>
+              <div style={{width:`${tradeStats.total?tradeStats.losses/tradeStats.total*100:0}%`,background:"#dc2626"}}/>
+              <div style={{width:`${tradeStats.total?tradeStats.flat/tradeStats.total*100:0}%`,background:"#94a3b8"}}/>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+              {card(tradeStats.wins,"Winning Trades","#16a34a")}
+              {card(tradeStats.losses,"Losing Trades","#dc2626")}
+              {card(tradeStats.flat,"Flat Trades","#64748b")}
+            </div>
+          </div>
+          <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:14}}>
+            <div style={{color:"#475569",fontSize:10,textTransform:"uppercase",letterSpacing:.8,marginBottom:10}}>Old Signal History W/L</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:10}}>
+              {card(signalWins.length+"/"+closed.length,"Signal Win / Total","#2563eb")}
+              {card(`${(signalWins.length/Math.max(closed.length,1)*100).toFixed(0)}%`,"Signal Win Rate","#16a34a")}
+              {card((spnl>=0?"+$":"-$")+Math.abs(spnl),"Signal P&L",spnl>=0?"#16a34a":"#dc2626")}
+            </div>
+            {closed.map(s=>(
+              <div key={s.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 11px",background:"#eff6ff",borderRadius:7,border:`1px solid ${s.pnl>=0?"#dcfce7":"#dc2626"}`,marginBottom:6}}>
+                <Badge label={s.pnl>=0?"W":"L"} bg={s.pnl>=0?"#dcfce7":"#dc2626"} fg={s.pnl>=0?"#15803d":"#ffffff"}/>
+                <span style={{color:"#0f172a",fontWeight:700,fontFamily:"monospace",fontSize:12}}>{s.ticker}</span>
+                <span style={{color:"#475569",fontSize:11}}>{s.type} ${s.strike}  {s.strategy}</span>
+                <div style={{flex:1}}/>
+                <span style={{color:s.pnl>=0?"#22c55e":"#ef4444",fontWeight:700,fontFamily:"monospace",fontSize:13}}>{s.pnl>=0?"+":"-"}${Math.abs(s.pnl)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ):(
+        <div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}}>
+            {card((tradeStats.pnl>=0?"+$":"-$")+Math.abs(tradeStats.pnl).toFixed(2),"Realized P&L",tradeStats.pnl>=0?"#16a34a":"#dc2626")}
+            {card("$"+Math.abs(tradeStats.grossWin).toFixed(2),"Gross Profit","#16a34a")}
+            {card("$"+Math.abs(tradeStats.grossLoss).toFixed(2),"Gross Loss","#dc2626")}
+            {card(positions.length,"Open Positions","#d97706")}
+          </div>
+          <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,overflow:"hidden",marginBottom:12}}>
+            <div style={{padding:"12px 14px",fontWeight:900,borderBottom:"1px solid #bfdbfe"}}>P&L by Ticker</div>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+              <thead><tr style={{background:"#eff6ff",color:"#475569",textTransform:"uppercase",fontSize:10}}>{["Ticker","Trades","Wins","Losses","P&L"].map(h=><th key={h} style={{textAlign:"left",padding:"9px 12px"}}>{h}</th>)}</tr></thead>
+              <tbody>{tickerRows.map(r=><tr key={r.ticker} style={{borderTop:"1px solid #e2e8f0"}}><td style={{padding:"10px 12px",fontWeight:900,fontFamily:"monospace"}}>{r.ticker}</td><td style={{padding:"10px 12px"}}>{r.trades}</td><td style={{padding:"10px 12px",color:"#16a34a",fontWeight:800}}>{r.wins}</td><td style={{padding:"10px 12px",color:"#dc2626",fontWeight:800}}>{r.losses}</td><td style={{padding:"10px 12px",color:r.pnl>=0?"#16a34a":"#dc2626",fontWeight:900,fontFamily:"monospace"}}>{r.pnl>=0?"+$":"-$"}{Math.abs(r.pnl).toFixed(2)}</td></tr>)}</tbody>
+            </table>
+            {tickerRows.length===0&&<div style={{padding:20,textAlign:"center",color:"#64748b"}}>No closed trades found yet.</div>}
+          </div>
+          <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,overflow:"hidden"}}>
+            <div style={{padding:"12px 14px",fontWeight:900,borderBottom:"1px solid #bfdbfe"}}>All Closed Trades P&L</div>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+              <thead><tr style={{background:"#eff6ff",color:"#475569",textTransform:"uppercase",fontSize:10}}>{["Date","Ticker","Qty","Buy","Sell","P&L"].map(h=><th key={h} style={{textAlign:"left",padding:"9px 12px"}}>{h}</th>)}</tr></thead>
+              <tbody>{pnlRows.slice(0,60).map((r,i)=><tr key={r.id||i} style={{borderTop:"1px solid #e2e8f0"}}><td style={{padding:"10px 12px"}}>{r.date}</td><td style={{padding:"10px 12px",fontWeight:900,fontFamily:"monospace"}}>{r.ticker}</td><td style={{padding:"10px 12px"}}>{r.qty}</td><td style={{padding:"10px 12px",fontFamily:"monospace"}}>${Number(r.entry||0).toFixed(2)}</td><td style={{padding:"10px 12px",fontFamily:"monospace"}}>${Number(r.exit||0).toFixed(2)}</td><td style={{padding:"10px 12px",color:Number(r.pl)>=0?"#16a34a":"#dc2626",fontWeight:900,fontFamily:"monospace"}}>{Number(r.pl)>=0?"+$":"-$"}{Math.abs(Number(r.pl||0)).toFixed(2)}</td></tr>)}</tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+//  AI ADVISOR 
+const AITab=({prices,account,positions})=>{
+  const [msgs,setMsgs]=useState([{role:"assistant",text:"I'm KTrade AI  I know your live Alpaca positions, signals & P&L. Ask me anything."}]);
+  const [inp,setInp]=useState("");
+  const [loading,setLoading]=useState(false);
+  const bot=useRef(null);
+  useEffect(()=>bot.current?.scrollIntoView({behavior:"smooth"}),[msgs]);
+  const QUICK=["Which live signal has the best risk/reward?","What's my Alpaca account status?","Score my positions 1-10","What should I trade today?","Compare BUY vs WATCH signals"];
+  const send=async(txt)=>{
+    const msg=txt||inp.trim();if(!msg||loading)return;
+    setInp("");setMsgs(m=>[...m,{role:"user",text:msg}]);setLoading(true);
+    try{
+      const r=await fetch(`${API}/ai/advisor`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:msg,history:msgs.slice(1),account,positions,signals:SIGNALS})});
+      const d=await r.json();
+      if(!r.ok||!d.available) throw new Error(d.error||"AI advisor unavailable");
+      setMsgs(m=>[...m,{role:"assistant",text:d.answer||"No response."}]);
+    }catch(e){setMsgs(m=>[...m,{role:"assistant",text:`Error: ${e.message}. Start the backend and set ANTHROPIC_API_KEY in .env, not in the browser.`}]);}
+    setLoading(false);
+  };
+  const INP={background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:7,color:"#0f172a",padding:"9px 11px",fontSize:12,outline:"none"};
+  return(
+    <div>
+      <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:14,height:340,display:"flex",flexDirection:"column",marginBottom:12}}>
+        <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:8}}>
+          {msgs.map((m,i)=>(<div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}><div style={{maxWidth:"88%",background:m.role==="user"?"#dbeafe":"#eff6ff",color:"#0f172a",borderRadius:m.role==="user"?"11px 11px 2px 11px":"11px 11px 11px 2px",padding:"9px 13px",fontSize:12,lineHeight:1.65,whiteSpace:"pre-wrap"}}>{m.text}</div></div>))}
+          {loading&&<div style={{display:"flex"}}><div style={{background:"#eff6ff",borderRadius:"11px 11px 11px 2px",padding:"9px 13px",color:"#64748b",fontSize:12}}>analyzing<span style={{animation:"blink 1s infinite",color:"#2563eb"}}>...</span></div></div>}
+          <div ref={bot}/>
+        </div>
+        <div style={{display:"flex",gap:7,paddingTop:9,borderTop:"1px solid #bfdbfe",marginTop:7}}>
+          <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask about positions, signals, risk..." style={{...INP,flex:1}}/>
+          <button onClick={()=>send()} style={{background:"#2563eb",color:"#fff",border:"none",borderRadius:7,padding:"0 16px",cursor:"pointer",fontWeight:700,fontSize:16}}></button>
+        </div>
+      </div>
+      <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:12}}>
+        <div style={{color:"#475569",fontSize:10,textTransform:"uppercase",letterSpacing:.8,marginBottom:8}}>Quick</div>
+        <div style={{display:"flex",flexDirection:"column",gap:5}}>{QUICK.map((q,i)=><button key={i} onClick={()=>send(q)} style={{background:"#eff6ff",border:"1px solid #bfdbfe",color:"#475569",borderRadius:7,padding:"9px 12px",cursor:"pointer",fontSize:11,textAlign:"left"}}> {q}</button>)}</div>
+      </div>
+    </div>
+  );
+};
+
+//  AUTO TRADING TAB
+const AutoTradeTab=({toast})=>{
+  const [status,setStatus]=useState(null);
+  const [loading,setLoading]=useState(false);
+  const [token,setToken]=useState(()=>localStorage.getItem("KTRADE_ADMIN_TOKEN")||"");
+  const INP={background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:7,color:"#0f172a",padding:"9px 10px",fontSize:13,outline:"none",fontFamily:"monospace",width:"100%"};
+  const authHeaders=()=>({"Content-Type":"application/json","X-KTrade-Admin-Token":token});
+  const load=useCallback(async()=>{
+    try{
+      const r=await fetch(`${API}/auto/status`,{signal:AbortSignal.timeout(4000)});
+      const d=await r.json();
+      setStatus(d);
+    }catch(e){ setStatus(s=>s||{last_error:e.message}); }
+  },[]);
+  useEffect(()=>{load(); const iv=setInterval(load,3000); return()=>clearInterval(iv);},[load]);
+  const saveToken=()=>{localStorage.setItem("KTRADE_ADMIN_TOKEN",token); toast("Admin token saved in this browser","ok");};
+  const call=async(path)=>{
+    if(!token){toast("Enter KTRADE_ADMIN_TOKEN first","alert"); return;}
+    setLoading(true);
+    try{
+      const r=await fetch(`${API}${path}`,{method:"POST",headers:authHeaders(),body:"{}"});
+      const d=await r.json();
+      if(!r.ok||d.ok===false){toast(d.error||"Auto trading request failed","alert");}
+      else{toast(path.includes("stop")?"Auto trading stopped":"Auto trading command accepted","ok");}
+      setStatus(d.status||d);
+    }catch(e){toast(`Auto trading error: ${e.message}`,"alert");}
+    setLoading(false);
+    setTimeout(load,500);
+  };
+  const enabled=!!status?.enabled;
+  const running=!!status?.running;
+  const orderEnabled=!!status?.order_submission_enabled;
+  const connected=!!status?.connected;
+  const Pill=({ok,label})=><span style={{background:ok?"#dcfce7":"#fef2f2",border:`1px solid ${ok?"#22c55e":"#ef4444"}`,color:ok?"#15803d":"#dc2626",borderRadius:999,padding:"4px 9px",fontSize:11,fontWeight:700}}>{label}</span>;
+  return(
+    <div>
+      <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:16,marginBottom:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:14}}>
+          <div>
+            <div style={{color:"#0f172a",fontWeight:800,fontSize:16}}>Dashboard Auto Trading</div>
+            <div style={{color:"#475569",fontSize:12,marginTop:3}}>Automatically buys approved BUY signals using Alpaca paper bracket orders with stop-loss and take-profit.</div>
+          </div>
+          <div style={{display:"flex",gap:7,flexWrap:"wrap",justifyContent:"flex-end"}}>
+            <Pill ok={connected} label={connected?"Alpaca connected":"Not connected"}/>
+            <Pill ok={orderEnabled} label={orderEnabled?"Orders enabled":"Orders disabled"}/>
+            <Pill ok={running} label={running?"AUTO ON":"AUTO OFF"}/>
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}}>
+          {[[status?.interval_seconds||"-","Interval sec"],[status?.min_conviction||"-","Min conviction"],[status?.qty||"-","Qty/order"],[`${status?.stop_loss_pct??"-"}% / ${status?.take_profit_pct??"-"}%`,"Stop / Target"]].map(([v,l])=>(
+            <div key={l} style={{background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:9,padding:"10px 12px"}}><div style={{color:"#0f172a",fontWeight:700,fontSize:15,fontFamily:"monospace"}}>{v}</div><div style={{color:"#64748b",fontSize:10,textTransform:"uppercase",marginTop:2}}>{l}</div></div>
+          ))}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",gap:8,alignItems:"end"}}>
+          <div>
+            <div style={{color:"#475569",fontSize:11,marginBottom:5}}>Admin Token from .env: KTRADE_ADMIN_TOKEN</div>
+            <input value={token} onChange={e=>setToken(e.target.value)} style={INP} type="password" placeholder="Paste admin token"/>
+          </div>
+          <button onClick={saveToken} style={{background:"#eff6ff",border:"1px solid #bfdbfe",color:"#475569",borderRadius:7,padding:"9px 12px",cursor:"pointer",fontSize:12,fontWeight:700}}>Save Token</button>
+          <button disabled={loading||running||!orderEnabled||!connected} onClick={()=>call("/auto/start")} style={{background:(loading||running||!orderEnabled||!connected)?"#bfdbfe":"#dcfce7",border:"1px solid #22c55e",color:(loading||running||!orderEnabled||!connected)?"#475569":"#15803d",borderRadius:7,padding:"9px 14px",cursor:(loading||running||!orderEnabled||!connected)?"not-allowed":"pointer",fontSize:12,fontWeight:800}}>Start Auto</button>
+          <button disabled={loading||!running} onClick={()=>call("/auto/stop")} style={{background:(!running||loading)?"#bfdbfe":"#dc2626",border:"1px solid #ef4444",color:(!running||loading)?"#475569":"#ffffff",borderRadius:7,padding:"9px 14px",cursor:(!running||loading)?"not-allowed":"pointer",fontSize:12,fontWeight:800}}>Stop Auto</button>
+        </div>
+        <button disabled={loading||running||!orderEnabled||!connected} onClick={()=>call("/auto/run-once")} style={{marginTop:10,background:"#0f172a",border:"1px solid #bfdbfe",color:"#475569",borderRadius:7,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700}}>Run One Cycle Now</button>
+      </div>
+
+      <div style={{background:"#ffffff",border:"1px solid #bfdbfe",borderRadius:11,padding:14}}>
+        <div style={{color:"#0f172a",fontWeight:700,fontSize:14,marginBottom:10}}>Auto Trading Status</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,color:"#475569",fontSize:12}}>
+          <div>Enabled: <b style={{color:enabled?"#15803d":"#dc2626"}}>{String(enabled)}</b></div>
+          <div>Running: <b style={{color:running?"#15803d":"#dc2626"}}>{String(running)}</b></div>
+          <div>Cycles: <b>{status?.cycles??0}</b></div>
+          <div>Orders Submitted: <b>{status?.orders_submitted??0}</b></div>
+          <div>Last Cycle: <b>{status?.last_cycle_at||"-"}</b></div>
+          <div>Last Action: <b>{status?.last_action||"-"}</b></div>
+          <div style={{gridColumn:"1 / -1",color:status?.last_error?"#dc2626":"#475569"}}>Last Error: <b>{status?.last_error||"-"}</b></div>
+        </div>
+        {status?.blocked?.length>0&&(
+          <div style={{marginTop:12}}>
+            <div style={{color:"#475569",fontSize:10,textTransform:"uppercase",marginBottom:6}}>Recent blocked signals</div>
+            {status.blocked.slice(-8).map((b,i)=><div key={i} style={{background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:7,padding:"7px 9px",fontSize:11,color:"#475569",marginBottom:5}}><b style={{color:"#0f172a"}}>{b.ticker}</b> — {b.reason}</div>)}
+          </div>
+        )}
+      </div>
+
+      <div style={{background:"#fef2f2",border:"1px solid #ef4444",borderRadius:9,padding:12,marginTop:14,color:"#dc2626",fontSize:12,lineHeight:1.55}}>
+        Safety: this is paper trading only. Auto mode only submits orders when KTRADE_PAPER_ORDER_SUBMISSION=true, Alpaca paper is connected, the signal is BUY, conviction passes the threshold, RiskEngine approves, and no current/pending position already exists.
+      </div>
+    </div>
+  );
+};
+
+//  MAIN APP 
+const App=()=>{
+  const {connected,account,positions,prices,orders,reconciliation,signals,sparks,lastSync,mode,placeOrder,refresh}=useBackend();
+  const [tab,setTab]=useState("signals");
+  const [toasts,setToasts]=useState([]);
+  const addToast=useCallback((msg,type="info")=>{const id=Date.now()+Math.random();setToasts(t=>[...t,{id,msg,type}]);setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),4500);},[]);
+  const equity=account?parseFloat(account.equity||0):100000;
+  const liveSigs=(signals&&signals.length?signals:SIGNALS).filter(s=>s.status==="LIVE");
+  const TABS=[{id:"signals",icon:"",label:"Signals"},{id:"positions",icon:"",label:"Positions"},{id:"trade",icon:"",label:"Trade"},{id:"history",icon:"",label:"Trade History"},{id:"auto",icon:"",label:"Auto Trade"},{id:"alerts",icon:"",label:"Alerts"},{id:"perf",icon:"",label:"Performance"},{id:"ai",icon:"",label:"AI Advisor"}];
+  return(
+    <div style={{background:"#f8fafc",minHeight:"100vh",color:"#0f172a",fontFamily:"system-ui,sans-serif",paddingBottom:40}}>
+      <div style={{background:"#080c18",borderBottom:"1px solid #0f172a",padding:"13px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,zIndex:100}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div><span style={{fontWeight:900,fontSize:22,color:"#0f172a"}}>K</span><span style={{fontWeight:900,fontSize:22,color:"#2563eb"}}>Trade</span><span style={{fontWeight:700,fontSize:11,letterSpacing:2,color:"#64748b",marginLeft:5}}>PRO v10.0</span></div>
+          <div style={{width:1,height:18,background:"#bfdbfe"}}/>
+          <div style={{display:"flex",alignItems:"center",gap:5}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:connected?"#22c55e":"#ef4444",animation:connected?"pulse 2s infinite":"none"}}/>
+            <span style={{color:"#64748b",fontSize:10,fontFamily:"monospace"}}>{connected?`${mode.toUpperCase()}  ${(lastSync||new Date()).toLocaleTimeString("en-US",{hour12:false})}`:"DEMO MODE"}</span>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{textAlign:"right"}}><div style={{color:"#0f172a",fontWeight:700,fontSize:14,fontFamily:"monospace"}}>${equity.toLocaleString("en-US",{maximumFractionDigits:0})}</div><div style={{color:"#64748b",fontSize:9}}>equity</div></div>
+          <div style={{width:1,height:24,background:"#bfdbfe"}}/>
+          <div style={{textAlign:"right"}}><div style={{color:"#22c55e",fontWeight:700,fontSize:14,fontFamily:"monospace"}}>{liveSigs.filter(s=>s.label==="BUY").length} BUY</div><div style={{color:"#64748b",fontSize:9}}>{liveSigs.filter(s=>s.label==="WATCH").length} watch</div></div>
+          <button onClick={refresh} style={{background:"#0f172a",border:"1px solid #bfdbfe",color:"#475569",borderRadius:7,padding:"5px 11px",cursor:"pointer",fontSize:11}}></button>
+        </div>
+      </div>
+      <div style={{display:"flex",gap:3,padding:"10px 16px 0",overflowX:"auto"}}>
+        {TABS.map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{background:tab===t.id?"#2563eb":"none",color:tab===t.id?"#fff":"#475569",border:`1px solid ${tab===t.id?"#2563eb":"#bfdbfe"}`,borderRadius:7,padding:"7px 13px",cursor:"pointer",fontWeight:tab===t.id?700:500,fontSize:12,whiteSpace:"nowrap"}}>{t.icon} {t.label}</button>))}
+      </div>
+      <div style={{padding:"14px 16px"}}>
+        <StatusBar connected={connected} mode={mode} lastSync={lastSync} reconciliation={reconciliation} onRefresh={refresh}/>
+        {tab==="signals"&&<SignalsTab prices={prices} signals={signals}/>}
+        {tab==="positions"&&<PositionsTab positions={positions} account={account} prices={prices} sparks={sparks} placeOrder={placeOrder} toast={addToast}/>}
+        {tab==="trade"&&<TradeTab prices={prices} account={account} orders={orders} placeOrder={placeOrder} toast={addToast} connected={connected}/>}
+        {tab==="history"&&<TradeHistoryTab orders={orders}/>}
+        {tab==="auto"&&<AutoTradeTab toast={addToast}/>}
+        {tab==="alerts"&&<AlertsTab prices={prices} toast={addToast}/>}
+        {tab==="perf"&&<PerfTab account={account} positions={positions} prices={prices} orders={orders}/>}
+        {tab==="ai"&&<AITab prices={prices} account={account} positions={positions}/>}
+      </div>
+      <Toasts list={toasts}/>
+    </div>
+  );
+};
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
