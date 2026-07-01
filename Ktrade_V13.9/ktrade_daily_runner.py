@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-KTrade daily/intraday integrated runner.
+KTrade daily/intraday integrated runner with permanent scanner provider fallback.
 
-Safe default: scanner runs with --score-only, so no orders are placed.
-Use this for daily automation instead of manually running multiple .cmd files.
+Primary provider can be Finnhub, but if scanner fails or does not create a fresh
+scan output, it retries with fallback providers such as yfinance.
 
 Examples:
-  python ktrade_daily_runner.py daily
-  python ktrade_daily_runner.py intraday
-  python ktrade_daily_runner.py both
   python ktrade_daily_runner.py status
+  KTRADE_DATA_PROVIDER=finnhub python ktrade_daily_runner.py intraday --force
+  KTRADE_DATA_PROVIDER=finnhub python ktrade_daily_runner.py daily --force
 
-Environment overrides:
-  KTRADE_DATA_PROVIDER=yfinance|finnhub|alpaca
+Useful env:
+  KTRADE_DATA_PROVIDER=finnhub|yfinance|alpaca
+  KTRADE_SCANNER_FALLBACKS=finnhub,yfinance
   KTRADE_SCAN_UNIVERSE=extended
   KTRADE_DAILY_SCAN_INTERVAL=1d
   KTRADE_INTRADAY_SCAN_INTERVAL=5m
@@ -30,6 +30,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 LOG_DIR = ROOT / "logs"
 LOG_FILE = LOG_DIR / "ktrade_daily_runner.log"
+SCAN_FILE = ROOT / "data" / "ktrade_scan_latest.json"
+DAILY_BT_FILE = ROOT / "data" / "ktrade_backtest_latest.json"
+INTRADAY_BT_FILE = ROOT / "data" / "ktrade_intraday_backtest_latest.json"
 
 US_MARKET_HOLIDAYS_2026 = {
     "2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25",
@@ -59,6 +62,10 @@ def log(msg: str) -> None:
         f.write(line + "\n")
 
 
+def py() -> str:
+    return sys.executable or "python"
+
+
 def run_cmd(name: str, cmd: list[str], env: dict[str, str] | None = None) -> int:
     merged = os.environ.copy()
     if env:
@@ -69,25 +76,62 @@ def run_cmd(name: str, cmd: list[str], env: dict[str, str] | None = None) -> int
     return int(proc.returncode)
 
 
-def py() -> str:
-    # Use the current venv Python when called from service/cmd; fallback to sys.executable.
-    return sys.executable or "python"
+def fresh_file(path: Path, started_ts: float, min_size: int = 100) -> bool:
+    try:
+        return path.exists() and path.stat().st_size >= min_size and path.stat().st_mtime >= started_ts
+    except Exception:
+        return False
 
 
-def run_scanner(interval: str, provider: str, universe: str) -> int:
+def provider_chain(primary: str) -> list[str]:
+    primary = (primary or "yfinance").strip().lower()
+    raw = os.getenv("KTRADE_SCANNER_FALLBACKS", "").strip()
+    if raw:
+        chain = [x.strip().lower() for x in raw.split(",") if x.strip()]
+    elif primary == "finnhub":
+        chain = ["finnhub", "yfinance"]
+    else:
+        chain = [primary]
+    if primary not in chain:
+        chain.insert(0, primary)
+    # de-duplicate, preserve order
+    out: list[str] = []
+    for x in chain:
+        if x and x not in out:
+            out.append(x)
+    return out
+
+
+def run_scanner_once(interval: str, provider: str, universe: str) -> int:
     env = {
         "KTRADE_DATA_PROVIDER": provider,
         "KTRADE_SCAN_SYMBOLS": os.getenv("KTRADE_SCAN_SYMBOLS", ""),
         "KTRADE_SCAN_UNIVERSE": universe,
         "KTRADE_SCAN_INTERVAL": interval,
-        # extra safety; --score-only already prevents orders
         "KTRADE_ORDER_SUBMISSION_ENABLED": os.getenv("KTRADE_ORDER_SUBMISSION_ENABLED", "false"),
     }
     return run_cmd(
-        f"scanner_{interval}",
+        f"scanner_{interval}_{provider}",
         [py(), "agent/ktrade_agent_v9.py", "--score-only"],
         env,
     )
+
+
+def run_scanner_with_fallback(interval: str, primary_provider: str, universe: str) -> int:
+    providers = provider_chain(primary_provider)
+    last_rc = 1
+    for provider in providers:
+        started_ts = datetime.now().timestamp()
+        log(f"SCANNER_PROVIDER_START provider={provider} interval={interval}")
+        rc = run_scanner_once(interval, provider, universe)
+        ok_file = fresh_file(SCAN_FILE, started_ts)
+        if rc == 0 and ok_file:
+            log(f"SCANNER_PROVIDER_OK provider={provider} output={SCAN_FILE}")
+            return 0
+        log(f"SCANNER_PROVIDER_FAILED provider={provider} rc={rc} fresh_scan_file={ok_file}")
+        last_rc = rc or 1
+    log(f"SCANNER_ALL_PROVIDERS_FAILED providers={providers}")
+    return last_rc
 
 
 def run_vectorbt_daily() -> int:
@@ -115,7 +159,7 @@ def run_daily(force: bool = False, no_backtest: bool = False) -> int:
     provider = os.getenv("KTRADE_DATA_PROVIDER", "yfinance")
     universe = os.getenv("KTRADE_SCAN_UNIVERSE", "extended")
     interval = os.getenv("KTRADE_DAILY_SCAN_INTERVAL", "1d")
-    rc1 = run_scanner(interval, provider, universe)
+    rc1 = run_scanner_with_fallback(interval, provider, universe)
     rc2 = 0 if no_backtest else run_vectorbt_daily()
     return rc1 or rc2
 
@@ -127,7 +171,7 @@ def run_intraday(force: bool = False, no_backtest: bool = False) -> int:
     provider = os.getenv("KTRADE_DATA_PROVIDER", "yfinance")
     universe = os.getenv("KTRADE_SCAN_UNIVERSE", "extended")
     interval = os.getenv("KTRADE_INTRADAY_SCAN_INTERVAL", "5m")
-    rc1 = run_scanner(interval, provider, universe)
+    rc1 = run_scanner_with_fallback(interval, provider, universe)
     rc2 = 0 if no_backtest else run_vectorbt_intraday()
     return rc1 or rc2
 
@@ -138,6 +182,8 @@ def status() -> int:
     print(f"PYTHON={py()}")
     print(f"NOW_ET={now_et().strftime('%Y-%m-%d %H:%M %Z')}")
     print(f"TRADING_DAY={is_trading_day(now_et().date())}")
+    print(f"KTRADE_DATA_PROVIDER={os.getenv('KTRADE_DATA_PROVIDER', 'yfinance')}")
+    print(f"KTRADE_SCANNER_FALLBACKS={provider_chain(os.getenv('KTRADE_DATA_PROVIDER', 'yfinance'))}")
     for rel in [
         "agent/ktrade_agent_v9.py",
         "ktrade_vectorbt.py",
