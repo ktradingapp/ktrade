@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-KTrade daily/intraday integrated runner with permanent scanner provider fallback.
+KTrade daily/intraday integrated runner with permanent scanner provider fallback v2.
 
-Primary provider can be Finnhub, but if scanner fails or does not create a fresh
-scan output, it retries with fallback providers such as yfinance.
+Fixes an important edge case: agent/ktrade_agent_v9.py can exit with code 0 even
+when Finnhub returns HTTP 403 for every symbol and the scan file is unusable.
+This runner therefore checks both the process exit code AND scanner output/scan
+file quality before accepting a provider as successful.
 
 Examples:
   python ktrade_daily_runner.py status
@@ -21,11 +23,13 @@ Useful env:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
 from datetime import datetime, date
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parent
 LOG_DIR = ROOT / "logs"
@@ -66,14 +70,41 @@ def py() -> str:
     return sys.executable or "python"
 
 
-def run_cmd(name: str, cmd: list[str], env: dict[str, str] | None = None) -> int:
+def run_cmd(name: str, cmd: list[str], env: dict[str, str] | None = None, capture: bool = False) -> tuple[int, str]:
     merged = os.environ.copy()
     if env:
         merged.update(env)
     log(f"START {name}: {' '.join(cmd)}")
-    proc = subprocess.run(cmd, cwd=str(ROOT), env=merged)
-    log(f"END   {name}: exit={proc.returncode}")
-    return int(proc.returncode)
+    if not capture:
+        proc = subprocess.run(cmd, cwd=str(ROOT), env=merged)
+        log(f"END   {name}: exit={proc.returncode}")
+        return int(proc.returncode), ""
+
+    proc = subprocess.Popen(
+        cmd,
+        cwd=str(ROOT),
+        env=merged,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        bufsize=1,
+    )
+    lines: list[str] = []
+    assert proc.stdout is not None
+    for line in proc.stdout:
+        line = line.rstrip("\n")
+        print(line, flush=True)
+        lines.append(line)
+        # Keep a bounded in-memory buffer so huge scans do not consume too much RAM.
+        if len(lines) > 5000:
+            lines = lines[-3000:]
+        with LOG_FILE.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    rc = int(proc.wait())
+    log(f"END   {name}: exit={rc}")
+    return rc, "\n".join(lines)
 
 
 def fresh_file(path: Path, started_ts: float, min_size: int = 100) -> bool:
@@ -81,6 +112,63 @@ def fresh_file(path: Path, started_ts: float, min_size: int = 100) -> bool:
         return path.exists() and path.stat().st_size >= min_size and path.stat().st_mtime >= started_ts
     except Exception:
         return False
+
+
+def _walk_json(obj: Any):
+    if isinstance(obj, dict):
+        yield obj
+        for v in obj.values():
+            yield from _walk_json(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _walk_json(v)
+
+
+def scan_file_quality(path: Path) -> tuple[bool, str]:
+    """Return whether scan file appears usable enough to accept provider output."""
+    try:
+        obj = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        return False, f"scan_json_invalid:{e}"
+
+    rows = [d for d in _walk_json(obj) if isinstance(d, dict)]
+    # Count rows that look like symbol/signal records. Support several possible schemas.
+    symbol_rows = []
+    usable_rows = []
+    error_rows = []
+    for d in rows:
+        sym = d.get("ticker") or d.get("symbol") or d.get("sym")
+        if not sym:
+            continue
+        symbol_rows.append(d)
+        text = json.dumps(d, default=str).lower()
+        if "insufficient market-data history" in text or "http 403" in text or "forbidden" in text:
+            error_rows.append(d)
+            continue
+        action = str(d.get("action") or d.get("label") or d.get("side") or "").upper()
+        score = d.get("conviction", d.get("score", d.get("rank_score", None)))
+        if action in {"BUY", "WATCH", "SELL", "HOLD"} or score is not None:
+            usable_rows.append(d)
+
+    if len(symbol_rows) == 0:
+        return False, "scan_has_no_symbol_rows"
+    if len(error_rows) >= max(5, int(len(symbol_rows) * 0.50)):
+        return False, f"scan_mostly_error_rows:{len(error_rows)}/{len(symbol_rows)}"
+    if len(usable_rows) == 0:
+        return False, f"scan_has_no_usable_signal_rows:{len(symbol_rows)}_symbols"
+    return True, f"usable_rows={len(usable_rows)} symbol_rows={len(symbol_rows)} error_rows={len(error_rows)}"
+
+
+def scanner_output_failed(provider: str, output: str) -> tuple[bool, str]:
+    low = output.lower()
+    if provider.lower() == "finnhub" and "http 403" in low:
+        return True, "finnhub_http_403_detected"
+    insufficient_count = low.count("insufficient market-data history")
+    if insufficient_count >= 5:
+        return True, f"insufficient_history_count={insufficient_count}"
+    if "traceback (most recent call last)" in low:
+        return True, "python_traceback_detected"
+    return False, "output_ok"
 
 
 def provider_chain(primary: str) -> list[str]:
@@ -94,7 +182,6 @@ def provider_chain(primary: str) -> list[str]:
         chain = [primary]
     if primary not in chain:
         chain.insert(0, primary)
-    # de-duplicate, preserve order
     out: list[str] = []
     for x in chain:
         if x and x not in out:
@@ -102,7 +189,7 @@ def provider_chain(primary: str) -> list[str]:
     return out
 
 
-def run_scanner_once(interval: str, provider: str, universe: str) -> int:
+def run_scanner_once(interval: str, provider: str, universe: str) -> tuple[int, str]:
     env = {
         "KTRADE_DATA_PROVIDER": provider,
         "KTRADE_SCAN_SYMBOLS": os.getenv("KTRADE_SCAN_SYMBOLS", ""),
@@ -114,6 +201,7 @@ def run_scanner_once(interval: str, provider: str, universe: str) -> int:
         f"scanner_{interval}_{provider}",
         [py(), "agent/ktrade_agent_v9.py", "--score-only"],
         env,
+        capture=True,
     )
 
 
@@ -123,24 +211,37 @@ def run_scanner_with_fallback(interval: str, primary_provider: str, universe: st
     for provider in providers:
         started_ts = datetime.now().timestamp()
         log(f"SCANNER_PROVIDER_START provider={provider} interval={interval}")
-        rc = run_scanner_once(interval, provider, universe)
+        rc, output = run_scanner_once(interval, provider, universe)
         ok_file = fresh_file(SCAN_FILE, started_ts)
-        if rc == 0 and ok_file:
-            log(f"SCANNER_PROVIDER_OK provider={provider} output={SCAN_FILE}")
+        out_failed, out_reason = scanner_output_failed(provider, output)
+        quality_ok = False
+        quality_reason = "scan_file_not_fresh"
+        if ok_file:
+            quality_ok, quality_reason = scan_file_quality(SCAN_FILE)
+
+        if rc == 0 and ok_file and quality_ok and not out_failed:
+            log(f"SCANNER_PROVIDER_OK provider={provider} output={SCAN_FILE} quality={quality_reason}")
             return 0
-        log(f"SCANNER_PROVIDER_FAILED provider={provider} rc={rc} fresh_scan_file={ok_file}")
+
+        log(
+            "SCANNER_PROVIDER_FAILED "
+            f"provider={provider} rc={rc} fresh_scan_file={ok_file} "
+            f"output_failed={out_failed}:{out_reason} quality={quality_ok}:{quality_reason}"
+        )
         last_rc = rc or 1
     log(f"SCANNER_ALL_PROVIDERS_FAILED providers={providers}")
     return last_rc
 
 
 def run_vectorbt_daily() -> int:
-    return run_cmd("vectorbt_daily", [py(), "ktrade_vectorbt.py"])
+    rc, _ = run_cmd("vectorbt_daily", [py(), "ktrade_vectorbt.py"])
+    return rc
 
 
 def run_vectorbt_intraday() -> int:
     args = os.getenv("KTRADE_INTRADAY_VECTORBT_ARGS", "--fast --universe extended").split()
-    return run_cmd("vectorbt_intraday", [py(), "ktrade_intraday_vectorbt.py", *args])
+    rc, _ = run_cmd("vectorbt_intraday", [py(), "ktrade_intraday_vectorbt.py", *args])
+    return rc
 
 
 def should_skip(force: bool) -> bool:
@@ -194,6 +295,9 @@ def status() -> int:
     ]:
         p = ROOT / rel
         print(f"{rel}: {'OK' if p.exists() else 'MISSING'}")
+    if SCAN_FILE.exists():
+        ok, reason = scan_file_quality(SCAN_FILE)
+        print(f"data/ktrade_scan_latest.json quality: {'OK' if ok else 'BAD'} ({reason})")
     return 0
 
 
