@@ -4,22 +4,30 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version, example: v13.5"
+        description: "Release version, example: v13.9"
         required: true
-        default: "v13.4-github-test"
+        default: "v13.9"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Build release zip
+      - name: Build deploy zip
         run: |
-          zip -r Ktrade_${{ github.event.inputs.version }}_deploy.zip . \
-            -x ".git/*" ".github/*" ".env" ".env.*" ".venv/*" "venv/*" "__pycache__/*" "*.pyc" "*.log" "logs/*" "backups/*" "data/*.json" "data/*.jsonl" "data/*.csv" "*.zip" "*.tar.gz"
+          VERSION="${{ github.event.inputs.version }}"
+          zip -r "Ktrade_${VERSION}_deploy.zip" . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x ".venv/*" \
+            -x "venv/*" \
+            -x "__pycache__/*" \
+            -x "*.pyc" \
+            -x "*.log" \
+            -x "Ktrade_V*/*"
 
       - name: Configure SSH
         run: |
@@ -30,10 +38,12 @@ jobs:
 
       - name: Upload zip to VPS
         run: |
-          scp Ktrade_${{ github.event.inputs.version }}_deploy.zip \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/Ktrade_${{ github.event.inputs.version }}_deploy.zip
+          VERSION="${{ github.event.inputs.version }}"
+          scp "Ktrade_${VERSION}_deploy.zip" \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/Ktrade_${VERSION}_deploy.zip"
 
       - name: Deploy on VPS
         run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
-            "/opt/deploy_ktrade_release.sh ${{ github.event.inputs.version }} /root/Ktrade_${{ github.event.inputs.version }}_deploy.zip"
+          VERSION="${{ github.event.inputs.version }}"
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "/opt/deploy_ktrade_release.sh ${VERSION} /root/Ktrade_${VERSION}_deploy.zip"
