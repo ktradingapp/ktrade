@@ -3,7 +3,11 @@ name: Deploy KTrade to VPS
 on:
   workflow_dispatch:
     inputs:
-      version:
+      deploy_folder:
+        description: "Folder to deploy, example: ktrade_13.9"
+        required: true
+        default: "ktrade_13.9"
+      release_version:
         description: "Release version, example: v13.9"
         required: true
         default: "v13.9"
@@ -16,34 +20,80 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Build deploy zip
+      - name: Validate inputs
         run: |
-          VERSION="${{ github.event.inputs.version }}"
-          zip -r "Ktrade_${VERSION}_deploy.zip" . \
+          DEPLOY_FOLDER="${{ github.event.inputs.deploy_folder }}"
+          VERSION="${{ github.event.inputs.release_version }}"
+
+          if echo "$DEPLOY_FOLDER" | grep -q '[[:space:]]'; then
+            echo "ERROR: deploy_folder must not contain spaces. Use ktrade_13.9"
+            exit 1
+          fi
+
+          if echo "$VERSION" | grep -q '[[:space:]]'; then
+            echo "ERROR: release_version must not contain spaces. Use v13.9"
+            exit 1
+          fi
+
+          if ! echo "$VERSION" | grep -Eq '^v[0-9A-Za-z._-]+$'; then
+            echo "ERROR: release_version must start with v and only use letters, numbers, dot, underscore, or dash."
+            exit 1
+          fi
+
+          if [ ! -d "$DEPLOY_FOLDER" ]; then
+            echo "ERROR: deploy folder not found: $DEPLOY_FOLDER"
+            echo "Available folders:"
+            find . -maxdepth 1 -type d -name 'ktrade_*' -print
+            exit 1
+          fi
+
+          if [ ! -f "$DEPLOY_FOLDER/backend/ktrade_alpaca.py" ]; then
+            echo "ERROR: backend/ktrade_alpaca.py missing in $DEPLOY_FOLDER"
+            exit 1
+          fi
+
+          if [ ! -f "$DEPLOY_FOLDER/agent/ktrade_agent_v9.py" ]; then
+            echo "ERROR: agent/ktrade_agent_v9.py missing in $DEPLOY_FOLDER"
+            exit 1
+          fi
+
+          if [ ! -f "$DEPLOY_FOLDER/frontend/KTrade_preview.html" ]; then
+            echo "ERROR: frontend/KTrade_preview.html missing in $DEPLOY_FOLDER"
+            exit 1
+          fi
+
+      - name: Build deploy zip from selected version folder
+        run: |
+          DEPLOY_FOLDER="${{ github.event.inputs.deploy_folder }}"
+          VERSION="${{ github.event.inputs.release_version }}"
+
+          cd "$DEPLOY_FOLDER"
+
+          zip -r "../Ktrade_${VERSION}_deploy.zip" . \
             -x ".git/*" \
             -x ".github/*" \
             -x ".venv/*" \
             -x "venv/*" \
             -x "__pycache__/*" \
             -x "*.pyc" \
-            -x "*.log" \
-            -x "Ktrade_V*/*"
+            -x "*.log"
 
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
 
       - name: Upload zip to VPS
         run: |
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="${{ github.event.inputs.release_version }}"
           scp "Ktrade_${VERSION}_deploy.zip" \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/Ktrade_${VERSION}_deploy.zip"
 
       - name: Deploy on VPS
         run: |
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="${{ github.event.inputs.release_version }}"
           ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "/opt/deploy_ktrade_release.sh ${VERSION} /root/Ktrade_${VERSION}_deploy.zip"

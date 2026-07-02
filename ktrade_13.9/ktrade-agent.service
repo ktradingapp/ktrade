@@ -1,0 +1,26 @@
+# KTrade autonomous agent loop (scan -> risk -> execute). Order submission is
+# controlled by KTRADE_PAPER_ORDER_SUBMISSION in .env, NOT here.
+#
+# SAFETY: first deploy, append " --score-only" to ExecStart to verify the loop
+# runs without placing orders. Remove it once you've confirmed a paper round-trip.
+#
+#   sudo cp deploy/ktrade-agent.service /etc/systemd/system/
+#   sudo systemctl enable --now ktrade-agent
+[Unit]
+Description=KTrade autonomous agent loop
+After=network-online.target ktrade-backend.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ktrade
+WorkingDirectory=/app
+EnvironmentFile=/app/.env
+ExecStart=/app/.venv/bin/python agent/ktrade_agent_v9.py
+Restart=always
+RestartSec=15
+StandardOutput=append:/app/ktrade_agent.log
+StandardError=append:/app/ktrade_agent.log
+
+[Install]
+WantedBy=multi-user.target
