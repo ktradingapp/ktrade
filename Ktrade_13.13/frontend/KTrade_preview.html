@@ -177,31 +177,6 @@
   .demo-flag{display:none;color:var(--marigold)}
   .is-demo .demo-flag{display:inline}
 
-
-  /* top agent control buttons: keep START / STOP / RUN ONE CYCLE side by side */
-  .top-agent-bar{
-    display:flex!important;align-items:center;justify-content:center;gap:12px;
-    flex-wrap:nowrap!important;margin:-8px 0 18px 0;padding:12px 16px;
-    background:linear-gradient(180deg, rgba(36,29,99,.55), rgba(26,21,80,.38));
-    border:1px solid var(--line);border-radius:var(--radius);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.035), 0 14px 32px -26px #000;
-  }
-  .top-agent-bar .btn{white-space:nowrap!important;min-width:138px;text-align:center;padding-left:14px;padding-right:14px;margin:0!important}
-  .top-agent-bar .label{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-right:4px;white-space:nowrap}
-
-
-  /* Latest Scan: show top 10 rows by default, scroll to view all returned rows */
-  #scan.scan-scroll{
-    max-height:625px;
-    overflow-y:auto;
-    padding-right:8px;
-    scrollbar-width:thin;
-  }
-  #scan.scan-scroll::-webkit-scrollbar{width:8px}
-  #scan.scan-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:999px}
-  #scan.scan-scroll::-webkit-scrollbar-thumb{background:rgba(247,184,43,.55);border-radius:999px}
-  #scan.scan-scroll .scanrow{min-height:58px}
-
   @media (max-width:1080px){
     .hero{grid-template-columns:1fr 1fr 1fr}
     .grid,.row2{grid-template-columns:1fr}
@@ -210,7 +185,6 @@
     .hero{grid-template-columns:1fr 1fr}
     .wordmark{font-size:25px}.cart.equity .v{font-size:34px}
     .toran{flex-wrap:wrap}
-    .top-agent-bar{overflow-x:auto;justify-content:flex-start}
   }
   :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
   @media (prefers-reduced-motion:reduce){ .chakra .spin{animation:none!important} }
@@ -241,15 +215,6 @@
     <button class="kill" id="kill" title="Emergency kill — disable agent, cancel orders, optional flatten">Kill Switch</button>
   </header>
 
-  <!-- ░░ top agent controls: always one row ░░ -->
-  <section class="top-agent-bar" aria-label="Agent controls">
-    <span class="label">Agent Control</span>
-    <button class="btn go"   id="b-start">Start Agent</button>
-    <button class="btn stop" id="b-stop" disabled>Stop Agent</button>
-    <button class="btn"      id="b-once">Run One Cycle</button>
-  </section>
-
-
   <!-- ░░ hero cartouches ░░ -->
   <section class="hero">
     <div class="cart equity"><div class="k">Net Equity</div><div class="v" id="m-eq">$100,000</div><div class="sub" id="m-bp">Buying power $100,000</div></div>
@@ -266,12 +231,19 @@
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
       <div class="ptitle"><span class="eyebrow">Open Positions</span><span class="note" id="recon">broker reconciled</span></div>
       <div id="positions"></div>
-</div></section>
+
+      <div class="ptitle" style="margin-top:22px"><span class="eyebrow">Agent Control</span><span class="note">paper order routing</span></div>
+      <div class="controls">
+        <button class="btn go"   id="b-start">Start Agent</button>
+        <button class="btn stop" id="b-stop" disabled>Stop Agent</button>
+        <button class="btn"      id="b-once">Run One Cycle</button>
+      </div>
+    </div></section>
 
     <!-- latest scan -->
     <section class="panel"><div class="folio">
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
-      <div class="ptitle"><span class="eyebrow">Latest Scan</span><span class="note" id="scan-note">top 10 visible · scroll all</span></div>
+      <div class="ptitle"><span class="eyebrow">Latest Scan</span><span class="note">conviction ranked</span></div>
       <div id="scan"></div>
     </div></section>
   </div>
@@ -299,12 +271,12 @@
     </div></section>
   </div>
 
-  <div class="foot">KTrade <b>v13.9</b> · OctagonIT Product <span class="demo-flag">· showing sample data — backend not reached</span></div>
+  <div class="foot">KTrade <b>v13.13</b> · iT LLC <span class="demo-flag">· showing sample data — backend not reached</span></div>
 </div>
 
 <script>
 "use strict";
-const API = "/api";  // nginx proxies /api/ to Flask backend
+const API = "";  // relative → served by the Flask backend at /. Set to "http://localhost:5001" for cross-origin dev.
 
 /* ---- spokes for the chakra (24, the traditional count) ---- */
 (()=>{const g=document.getElementById("spokes");let s="";for(let i=0;i<24;i++){const a=i*15*Math.PI/180;
@@ -368,31 +340,15 @@ function renderPositions(rows){
 
 function renderScan(rows){
   const host=$("scan");
-  const note=$("scan-note");
-  host.classList.add("scan-scroll");
-  if(!rows||!rows.length){
-    if(note) note.textContent="top 10 visible · scroll all";
-    host.innerHTML='<div class="empty">No scan yet — run a cycle.</div>';
-    return;
-  }
-
-  // Render every returned scan row, but keep the panel height to about 10 rows.
-  // User can scroll inside Latest Scan to see the full list.
-  const visibleDefault=10;
-  const sorted=[...rows].sort((a,b)=>(+b.conv||0)-(+a.conv||0));
-  if(note) note.textContent=sorted.length>visibleDefault
-    ? `top ${visibleDefault} visible · ${sorted.length} total`
-    : `${sorted.length} shown`;
-
-  const max=Math.max(...sorted.map(r=>+r.conv||0),100);
-  host.innerHTML=sorted.map((r,i)=>{
+  if(!rows||!rows.length){host.innerHTML='<div class="empty">No scan yet — run a cycle.</div>';return;}
+  const max=Math.max(...rows.map(r=>r.conv),100);
+  host.innerHTML=rows.map((r,i)=>{
     const buy=(r.action||"").toUpperCase()==="BUY";
     const actCls=buy?"side-buy":"";
-    const conv=Math.round(+r.conv||0);
     return `<div class="scanrow"><span class="rank">${String(i+1).padStart(2,"0")}</span>
       <div><span class="scan-sym">${r.ticker}</span><span class="scan-act ${actCls}">${r.action}</span>
-        <div class="meter" style="margin-top:7px"><i style="width:${Math.round(conv/max*100)}%"></i></div></div>
-      <span class="conv">${conv}</span></div>`;
+        <div class="meter" style="margin-top:7px"><i style="width:${Math.round(r.conv/max*100)}%"></i></div></div>
+      <span class="conv">${r.conv}</span></div>`;
   }).join("");
 }
 

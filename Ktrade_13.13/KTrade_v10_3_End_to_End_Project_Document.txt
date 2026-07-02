@@ -1,0 +1,715 @@
+
+KTrade v10.3 End-to-End Project Document
+
+Project folder: C:\trading-agent\Ktrade_v10_3
+
+This document explains how the KTrade v10.3 paper-trading project works end to end. It covers the dashboard, backend, market data, strategy engine, VectorBT backtesting, sentiment layer, broker reconciliation, risk rules, and daily run process.
+
+Important note: This project is for paper trading, testing, and learning. It is not financial advice. Do not use it for live-money trading unless the strategy has been independently validated and risk controls are reviewed.
+
+#1. What This Project Does
+
+KTrade v10.3 is a paper-trading dashboard and signal engine.
+
+The goal is:
+
+1. Collect market data.
+2. Run strategy logic on selected stocks/ETFs/crypto symbols.
+3. Rank symbols as BUY or WATCH.
+4. Show signal details in a dashboard.
+5. Add AI sentiment confirmation using Finnhub + FinBERT + OpenAI.
+6. Allow paper trades through Alpaca.
+7. Reconcile dashboard positions with real Alpaca paper broker truth.
+
+Simple flow:
+
+```text
+Market Data -> Strategy Scanner -> BUY/WATCH Signals -> Dashboard -> Paper Trade -> Alpaca Broker Truth
+                              -> Sentiment Layer -> Confirmation / Warning
+```
+
+#2. Main Components
+
+| Component | What It Does |
+|---|---|
+| Frontend Dashboard | Shows signals, positions, trades, alerts, performance, and AI sentiment. |
+| Backend API | Serves dashboard data and connects to Alpaca, Finnhub, reconciliation, and sentiment. |
+| Scanner Agent | Reads market data and ranks symbols using strategy/conviction score. |
+| VectorBT Backtest | Tests strategies historically and saves approved parameters. |
+| Intraday VectorBT | Tests intraday strategy ideas on shorter timeframes. |
+| Sentiment Engine | Uses Finnhub news, FinBERT sentiment, and OpenAI explanation. |
+| Alpaca Paper Trading | Places paper trades and returns real paper account positions/orders. |
+| Broker Reconciliation | Checks that dashboard/account state matches Alpaca broker truth. |
+
+#3. Current Important Settings
+
+Current project settings from your `.env`:
+
+```text
+LIVE_TRADING=false
+KTRADE_PAPER_ORDER_SUBMISSION=true
+RISK_PER_TRADE=0.005
+MIN_CONVICTION_SCORE=75
+MAX_POSITIONS_PER_HEARTBEAT=3
+KTRADE_SCAN_UNIVERSE=extended
+KTRADE_ENABLE_OPENAI_SENTIMENT=true
+KTRADE_ENABLE_FINBERT=true
+KTRADE_SENTIMENT_TTL_SECONDS=1800
+```
+
+Meaning:
+
+- Live trading is disabled.
+- Paper trading is enabled.
+- Each trade is risk-limited.
+- A signal needs at least 75 conviction to become BUY.
+- Below 75, it should normally show WATCH.
+- Sentiment is enabled as a confirmation/warning layer.
+
+#4. Data Sources
+
+The project supports multiple market data sources.
+
+| Source | Use |
+|---|---|
+| Polygon | Market bars/quotes when available. Good primary source if API is stable. |
+| Alpaca | Broker account, paper orders, positions, account equity, and quote fallback. |
+| Finnhub | News, quote/candle fallback, sentiment news source. |
+| yfinance | Final fallback for historical data/testing. |
+
+Recommended data order:
+
+```text
+Polygon -> Alpaca -> Finnhub -> yfinance
+```
+
+If you force Finnhub scanner:
+
+```cmd
+set KTRADE_DATA_PROVIDER=finnhub
+```
+
+Then the scanner should show:
+
+```text
+DataFeed source: FINNHUB
+```
+
+#5. What Is Our Strategy?
+
+Your project does not use one single simple strategy. It uses a combined conviction strategy.
+
+The scanner looks at several market conditions and creates a conviction score.
+
+##Daily Scanner Strategy Inputs
+
+For daily/swing-style scan, the score uses:
+
+| Component | Meaning |
+|---|---|
+| Momentum | Checks whether the stock has moved strongly over recent periods. |
+| Volume | Checks whether volume is stronger than normal. |
+| Trend | Checks whether price is above key moving averages like 50 EMA and 200 EMA. |
+| MACD | Checks whether MACD supports bullish or bearish movement. |
+| Relative Strength | Checks whether the stock is stronger than SPY. |
+
+Daily weighting from the scanner logic:
+
+```text
+Momentum: 33%
+Volume: 22%
+Trend: 23%
+MACD: 16%
+Relative Strength: remaining small confirmation
+ORB: excluded on daily because opening range needs intraday candles
+```
+
+##Intraday Scanner Strategy Inputs
+
+For intraday scan, ORB is included.
+
+Intraday weighting:
+
+```text
+Momentum: 30%
+Volume: 20%
+Trend: 20%
+MACD: 15%
+ORB: 10%
+Relative Strength: 5%
+```
+
+##BUY / WATCH Rule
+
+Current threshold:
+
+```text
+MIN_CONVICTION_SCORE=75
+```
+
+Meaning:
+
+```text
+Score >= 75 -> BUY
+Score < 75  -> WATCH
+```
+
+Example:
+
+```text
+NVDA score 82 -> BUY
+AAPL score 68 -> WATCH
+```
+
+#6. Strategy Types Used
+
+##6.1 Momentum Strategy
+
+Momentum checks whether price has been moving strongly.
+
+Simple meaning:
+
+```text
+If a stock is already moving up strongly and the move has strength, it can score higher.
+```
+
+Used for:
+
+- Trend continuation
+- Strong movers
+- Growth/AI/tech names
+
+##6.2 MACD + EMA Strategy
+
+MACD checks momentum direction. EMA checks trend.
+
+BUY support happens when:
+
+```text
+Price is above long-term trend
+MACD turns bullish
+Trend condition is supportive
+```
+
+Simple example:
+
+```text
+Price above 200 EMA + MACD crosses up = bullish confirmation
+```
+
+##6.3 MACD EMA Confluence
+
+This is a stronger version of MACD + EMA.
+
+It adds:
+
+- Volume surge
+- Higher-high confirmation
+- Trend confirmation
+
+Meaning:
+
+```text
+The stock is not just moving up; it has trend, volume, and price confirmation.
+```
+
+##6.4 ORB - Opening Range Breakout
+
+ORB is for intraday trading.
+
+Simple meaning:
+
+```text
+First part of the trading day creates a high and low range.
+If price breaks above that range with volume, it may be an intraday BUY setup.
+```
+
+Important:
+
+- ORB should be used only with intraday candles like 1m, 5m, or 15m.
+- It is not meaningful for daily candles.
+- v10.3 correctly excludes ORB from daily scoring.
+
+##6.5 Relative Strength
+
+Relative strength compares a stock against SPY.
+
+Simple meaning:
+
+```text
+If the stock is stronger than the broader market, it gets extra confirmation.
+```
+
+#7. VectorBT Backtesting Role
+
+VectorBT is not the daily scanner. It is the historical testing engine.
+
+It checks whether strategy parameters worked historically.
+
+Flow:
+
+```text
+Historical data -> VectorBT tests strategy parameters -> Approved params saved -> Scanner can use approved params
+```
+
+Main files:
+
+```text
+ktrade_vectorbt.py
+ktrade_intraday_vectorbt.py
+data\ktrade_approved_params.json
+data\ktrade_intraday_approved_params.json
+```
+
+VectorBT tests strategies like:
+
+- MACD
+- EMA
+- Momentum
+- Conviction strategy
+- Intraday VWAP/ORB-style ideas in the intraday file
+
+It checks metrics such as:
+
+| Metric | Meaning |
+|---|---|
+| Sharpe | Risk-adjusted quality of returns. Higher is better. |
+| Profit Factor | Gross profit divided by gross loss. Above 1 is better. |
+| Max Drawdown | Largest historical decline. Lower is safer. |
+| Win Rate | Percent of winning trades. Useful but not enough alone. |
+| Total Return | Historical return in the test period. |
+
+Important:
+
+```text
+VectorBT approval does not guarantee future profit.
+It only says the setup passed historical rules.
+```
+
+#8. Sentiment Layer - Finnhub + FinBERT + OpenAI
+
+Sentiment is now added as a confirmation layer.
+
+Flow:
+
+```text
+Finnhub News -> FinBERT Sentiment Score -> OpenAI Explanation -> Dashboard Confirmation
+```
+
+##Finnhub Role
+
+Finnhub gets company news headlines and summaries.
+
+Example:
+
+```text
+/news/NVDA
+```
+
+##FinBERT Role
+
+FinBERT is a finance-specific AI model.
+
+It reads financial news and scores:
+
+```text
+Positive / Neutral / Negative
+Confidence score
+```
+
+##OpenAI Role
+
+OpenAI explains the result in simple English.
+
+Example:
+
+```text
+Recent news is positive because analysts mention strong AI demand and revenue growth.
+This supports the existing BUY signal, but strategy and risk rules should still decide.
+```
+
+##Sentiment Rule
+
+Sentiment must not place trades by itself.
+
+Correct use:
+
+```text
+Strategy BUY + Sentiment Positive = BUY confirmed
+Strategy BUY + Sentiment Negative = BUY with warning
+Strategy WATCH + Sentiment Positive = Watch improving
+Strategy WATCH + Sentiment Negative = Risk warning
+```
+
+#9. Paper Trading Flow
+
+Paper trading goes through Alpaca.
+
+Flow:
+
+```text
+Dashboard Trade Button -> Backend /buy or /sell -> Alpaca Paper API -> Order/Position update -> Dashboard sync
+```
+
+Important:
+
+```text
+LIVE_TRADING=false
+```
+
+So the project is intended for paper trading.
+
+Paper order submission is enabled:
+
+```text
+KTRADE_PAPER_ORDER_SUBMISSION=true
+```
+
+This means dashboard paper orders are allowed.
+
+#10. Broker Reconciliation
+
+Broker reconciliation checks whether your dashboard agrees with Alpaca.
+
+Why it matters:
+
+- The dashboard should not invent positions.
+- Alpaca is the source of truth.
+- If a trade fills, cancels, or closes, dashboard should reflect broker reality.
+
+Main endpoints:
+
+```text
+/reconciliation
+/reconcile_truth
+/closed_trades
+```
+
+Simple meaning:
+
+```text
+If Alpaca says you hold 3 positions, dashboard should show the same 3 positions.
+```
+
+#11. Dashboard Explanation
+
+Main dashboard URL:
+
+```text
+http://localhost:5001
+```
+
+Main tabs:
+
+| Tab | Purpose |
+|---|---|
+| Signals | Shows BUY/WATCH signals from scanner. |
+| Positions | Shows current Alpaca paper positions. |
+| Trade | Lets you place paper trades. |
+| Alerts | Shows warnings and system messages. |
+| Performance | Shows account/trade performance. |
+| AI Advisor | Chat/assistant-style project notes if enabled. |
+
+Signal card fields:
+
+| Field | Meaning |
+|---|---|
+| Ticker | Stock symbol. |
+| CALL/PUT | Direction/type display for paper option-style signal cards. |
+| Strategy | Strategy that produced the signal, like MOMENTUM or MACD_EMA. |
+| BUY/WATCH | Scanner decision based on conviction score. |
+| Entry | Approximate entry price shown by system. |
+| Target | Expected target level. |
+| Stop | Stop/risk level. |
+| Live Est | Current estimated value from latest price. |
+| Conviction | Score from strategy engine. |
+| AI Sentiment | FinBERT/OpenAI confirmation or warning. |
+
+#12. Main Files and Uses
+
+| File | Use |
+|---|---|
+| backend\ktrade_alpaca.py | Main backend server, dashboard API, Alpaca connection, paper orders, reconciliation, sentiment endpoint. |
+| frontend\KTrade_preview.html | Main dashboard UI shown at localhost:5001. |
+| agent\ktrade_agent_v9.py | Scanner and strategy engine. Produces BUY/WATCH signals. |
+| data\ktrade_data.py | Market data provider logic: Polygon, Alpaca, Finnhub, yfinance. |
+| data\openai_finbert_sentiment.py | Sentiment engine: Finnhub news + FinBERT + OpenAI explanation. |
+| backend\broker_reconciler.py | Broker truth and closed trade reconciliation. |
+| ktrade_vectorbt.py | Daily/swing historical backtesting. |
+| ktrade_intraday_vectorbt.py | Intraday historical backtesting. |
+| data\ktrade_scan_latest.json | Latest scanner output used by dashboard. |
+| data\ktrade_approved_params.json | VectorBT-approved daily strategy parameters. |
+| data\ktrade_intraday_approved_params.json | VectorBT-approved intraday strategy parameters. |
+| .env | Local secret/config file. Do not upload to GitHub. |
+| requirements.txt | Python dependencies. |
+| RUN_SCANNER_FINNHUB_DAILY.cmd | Runs daily scanner using Finnhub. |
+| RUN_SCANNER_FINNHUB_INTRADAY.cmd | Runs intraday scanner using Finnhub. |
+| START_BACKEND.cmd | Starts backend if present/updated. |
+
+#13. Daily Run Commands
+
+##CMD 1 - Start Backend
+
+```cmd
+cd /d C:\trading-agent\Ktrade_v10_3
+.venv\Scripts\python.exe backend\ktrade_alpaca.py
+```
+
+Keep this window open.
+
+Dashboard:
+
+```text
+http://localhost:5001
+```
+
+##CMD 2 - Run Daily Scanner
+
+```cmd
+cd /d C:\trading-agent\Ktrade_v10_3
+RUN_SCANNER_FINNHUB_DAILY.cmd
+```
+
+Expected source:
+
+```text
+DataFeed source: FINNHUB
+```
+
+##CMD 2 - Run Intraday Scanner
+
+```cmd
+cd /d C:\trading-agent\Ktrade_v10_3
+RUN_SCANNER_FINNHUB_INTRADAY.cmd
+```
+
+Use this when you want intraday-style signals.
+
+#14. VectorBT Commands
+
+Run daily VectorBT only when:
+
+- Strategy changed
+- New stocks added
+- You want fresh approved parameters
+- You want to recheck historical performance
+
+```cmd
+cd /d C:\trading-agent\Ktrade_v10_3
+.venv\Scripts\python.exe ktrade_vectorbt.py
+```
+
+Run intraday VectorBT:
+
+```cmd
+cd /d C:\trading-agent\Ktrade_v10_3
+.venv\Scripts\python.exe ktrade_intraday_vectorbt.py --fast --universe extended
+```
+
+You do not need to run VectorBT every time you open the dashboard.
+
+#15. Sentiment Test Commands
+
+Start backend first, then open:
+
+```text
+http://localhost:5001/sentiment/AAPL
+```
+
+Good result should include:
+
+```json
+"available": true
+"sentiment": "positive" or "neutral" or "negative"
+"finbert_used": true
+"openai_used": true
+```
+
+If FinBERT is not installed, it may show:
+
+```json
+"finbert_used": false
+```
+
+Then install:
+
+```cmd
+cd /d C:\trading-agent\Ktrade_v10_3
+.venv\Scripts\pip.exe install transformers torch
+```
+
+If OpenAI key is missing or invalid, it may show:
+
+```json
+"openai_used": false
+```
+
+Then check:
+
+```text
+C:\trading-agent\Ktrade_v10_3\.env
+```
+
+#16. How to Read a BUY Signal
+
+Example:
+
+```text
+Ticker: NVDA
+Signal: BUY
+Score: 82
+Strategy: MOMENTUM
+Sentiment: Positive
+```
+
+Meaning:
+
+1. Scanner score is above 75.
+2. Strategy conditions are strong enough.
+3. Sentiment confirms the signal.
+4. It may be considered for paper trade.
+5. Risk rules still matter.
+
+This does not mean guaranteed profit.
+
+#17. How to Read a WATCH Signal
+
+Example:
+
+```text
+Ticker: AAPL
+Signal: WATCH
+Score: 68
+Strategy: MOMENTUM
+Sentiment: Positive
+```
+
+Meaning:
+
+1. Some conditions are good.
+2. Score is below 75.
+3. It is not ready as a BUY under your current rules.
+4. Sentiment may be improving, but strategy still says WAIT.
+
+#18. Why a Position Can Be Red While Signal Still Says BUY
+
+A stock can be temporarily down after entry while the strategy still says BUY.
+
+Reasons:
+
+- Price moved against you after entry.
+- Signal is based on broader trend, not every small price move.
+- Spread/market movement can create temporary paper loss.
+- Strategy can remain BUY until conditions break.
+
+A red position does not automatically mean strategy failed.
+
+A strategy failure is better judged by:
+
+- Did stop-loss hit?
+- Did risk rule trigger?
+- Did thesis/strategy condition break?
+- Did many trades fail over time?
+- Does backtest/live paper performance remain positive?
+
+#19. One-Day / Intraday vs Swing
+
+| Type | Meaning |
+|---|---|
+| Intraday | Trade opened and usually closed same day. Uses 1m/5m/15m signals. |
+| Swing | Trade held for days/weeks. Uses daily trend and momentum. |
+| Momentum | Follows strong price movement. Can be intraday or swing. |
+| ORB | Opening Range Breakout, mostly intraday. |
+| Position/Invest | Longer-term holding. Not the current primary project goal. |
+
+#20. Production / Render Notes
+
+For a public link, backend must run on a server like Render, DigitalOcean, Azure, etc.
+
+Render Web Service:
+
+- Runs backend/dashboard.
+- Must have environment variables configured.
+- Users can open the public Render URL.
+
+Render Cron Job:
+
+- Can run scanner periodically.
+- Example: daily scanner every few minutes/hours during market time.
+
+Important:
+
+- If backend is not running, dashboard cannot update.
+- If scanner is not running, signals may become stale.
+- If Alpaca/Finnhub/OpenAI keys are missing, related features will not work.
+
+#21. Safety Rules
+
+Recommended safety rules:
+
+1. Keep LIVE_TRADING=false until testing is complete.
+2. Use paper trading only.
+3. Never commit `.env` to GitHub.
+4. Rotate API keys if they appear in screenshots/logs.
+5. Keep sentiment as confirmation only.
+6. Do not average into losing trades unless a tested rule explicitly allows it.
+7. Watch max drawdown and profit factor over many trades, not one trade.
+8. Do not trust one backtest blindly.
+9. Track real paper results for weeks/months.
+
+#22. Best Daily Workflow
+
+1. Start backend.
+2. Run scanner.
+3. Open dashboard.
+4. Review BUY signals.
+5. Click signal card and check:
+   - Strategy
+   - Score
+   - Entry
+   - Target
+   - Stop
+   - Sentiment
+   - Risk/reward
+6. Place only paper trade if you want to test.
+7. Monitor Positions tab.
+8. Sync/refresh after trade.
+9. Review closed trades and performance.
+10. Adjust strategy only after enough trade sample size.
+
+#23. Final Simple Explanation
+
+KTrade v10.3 is built like this:
+
+```text
+VectorBT checks if strategy worked historically.
+Scanner checks current market conditions.
+Finnhub gets news.
+FinBERT scores financial sentiment.
+OpenAI explains the sentiment.
+Dashboard shows BUY/WATCH with reasoning.
+Alpaca places paper trades.
+Broker reconciliation checks the truth.
+Risk rules protect the account.
+```
+
+The main decision should always be:
+
+```text
+Strategy + Risk + Backtest + Paper Results
+```
+
+Sentiment should only be:
+
+```text
+Confirmation or warning
+```
+
+Current project status:
+
+```text
+Paper trading: enabled
+Live trading: disabled
+BUY threshold: 75
+Sentiment: Finnhub + FinBERT + OpenAI available when keys/packages are configured
+```

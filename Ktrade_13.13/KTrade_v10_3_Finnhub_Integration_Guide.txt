@@ -1,0 +1,55 @@
+KTrade v10.3 - Finnhub Integration Guide
+========================================
+
+What was added
+--------------
+Finnhub is now integrated as an optional market-data and news source.
+
+Updated files
+-------------
+1. data\ktrade_data.py
+   Use: scanner/backtest market data feed.
+   New: supports FINNHUB_API_KEY and KTRADE_DATA_PROVIDER=finnhub.
+   Flow: Polygon -> Alpaca -> Finnhub -> yfinance when KTRADE_DATA_PROVIDER=auto.
+
+2. backend\ktrade_alpaca.py
+   Use: backend server and dashboard API.
+   New: /quote/<ticker> can use Finnhub fallback when Alpaca quote is missing.
+   New: /news/<ticker> returns Finnhub company news if FINNHUB_API_KEY is configured.
+
+3. .env.template
+   Use: example environment settings.
+   New: FINNHUB_API_KEY placeholder and data-provider note.
+
+4. .env
+   Use: your local secret settings.
+   New: FINNHUB_API_KEY= blank placeholder if it was missing. Put your key there.
+
+5. RUN_SCANNER_FINNHUB_DAILY.cmd
+   Use: run daily scanner directly with Finnhub.
+
+6. RUN_SCANNER_FINNHUB_INTRADAY.cmd
+   Use: run intraday scanner directly with Finnhub.
+
+How to use
+----------
+Step 1: Add your Finnhub key in:
+C:	rading-agent\Ktrade_v10_3\.env
+
+Add/fill this line:
+FINNHUB_API_KEY=your_real_key_here
+
+Step 2: Start backend:
+cd /d C:	rading-agent\Ktrade_v10_3
+.venv\Scripts\python.exe backend\ktrade_alpaca.py
+
+Step 3: Run Finnhub daily scanner in another CMD:
+cd /d C:	rading-agent\Ktrade_v10_3
+RUN_SCANNER_FINNHUB_DAILY.cmd
+
+Step 4: Open dashboard:
+http://localhost:5001
+
+Important note
+--------------
+Finnhub is useful for quotes and news/sentiment. For broker truth and paper trades, Alpaca is still the source of truth.

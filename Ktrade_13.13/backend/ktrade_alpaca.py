@@ -1,5 +1,5 @@
 """
-KTrade PRO — Alpaca Paper Trading Bridge
+KTrade PRO â€” Alpaca Paper Trading Bridge
 ==========================================
 Connects KTrade frontend to Alpaca paper trading account.
 Fetches real positions, live prices, account info.
@@ -1404,7 +1404,7 @@ def auto_run_once():
 
 @app.route("/all")
 def all_data():
-    """Single call — KTrade frontend calls this for everything"""
+    """Single call â€” KTrade frontend calls this for everything"""
     # Load + VALIDATE signals from ktrade_scan_latest.json (v10.7 #6)
     signals = []
     try:
@@ -1673,72 +1673,6 @@ def sell():
     log.info("[DEMO] MANUAL SELL %sx %s", qty, ticker)
     return jsonify({"ok": True, "order": fake, "mode": "demo"})
 
-
-@app.route("/close_position", methods=["POST"])
-def close_position():
-    """Close an existing broker position without treating it as a new entry.
-
-    This route is for the Positions tab only:
-    - Long qty > 0: Alpaca closes by selling.
-    - Short qty < 0: Alpaca closes by buying to cover.
-    - It bypasses manual BUY reference-price validation because this is an exit.
-    - It cancels open orders for the same symbol first so bracket/held orders do not block close.
-    """
-    body = request.get_json(silent=True) or {}
-    if not ORDER_SUBMISSION_ENABLED:
-        return jsonify({"error": "Paper order submission is disabled"}), 403
-    auth_error = require_admin()
-    if auth_error:
-        return auth_error
-    if not state.get("connected") and not _manual_allow_demo():
-        return jsonify({"error": "Backend is not connected to Alpaca paper; refusing close position"}), 503
-
-    ticker = str(body.get("ticker") or body.get("symbol") or "").upper().strip()
-    if not ticker:
-        return jsonify({"error": "ticker is required"}), 400
-
-    positions = fetch_positions() or []
-    pos = next((p for p in positions if str(p.get("ticker") or p.get("symbol") or "").upper() == ticker), None)
-    if not pos:
-        refresh_after_order("CLOSE_POSITION_NOT_FOUND")
-        return jsonify({"ok": True, "status": "already_closed", "ticker": ticker})
-
-    current_qty = float(pos.get("shares") or pos.get("qty") or 0)
-    if abs(current_qty) <= 0:
-        refresh_after_order("CLOSE_POSITION_ZERO")
-        return jsonify({"ok": True, "status": "already_closed", "ticker": ticker})
-
-    canceled = []
-    try:
-        open_orders = alpaca_get("/v2/orders?status=open&limit=500") or []
-        for o in open_orders:
-            if str(o.get("symbol") or "").upper() == ticker and o.get("id"):
-                try:
-                    alpaca_delete(f"/v2/orders/{o['id']}")
-                    canceled.append(o["id"])
-                except Exception as exc:
-                    log.warning("close_position could not cancel order %s for %s: %s", o.get("id"), ticker, exc)
-    except Exception as exc:
-        log.warning("close_position could not fetch/cancel open orders for %s: %s", ticker, exc)
-
-    try:
-        result = alpaca_delete(f"/v2/positions/{ticker}")
-        refresh_after_order("CLOSE_POSITION")
-        log.info("MANUAL CLOSE POSITION %s qty=%s canceled_orders=%s result=%s", ticker, current_qty, len(canceled), result)
-        return jsonify({
-            "ok": True,
-            "ticker": ticker,
-            "qty_before_close": current_qty,
-            "action": "buy_to_cover" if current_qty < 0 else "sell_to_close",
-            "canceled_orders": canceled,
-            "order": result,
-            "status": "submitted",
-            "mode": "paper",
-        })
-    except Exception as exc:
-        log.error("close_position failed for %s: %s", ticker, exc)
-        return jsonify({"error": f"Close position failed: {exc}"}), 500
-
 @app.route("/cancel/<order_id>", methods=["DELETE"])
 def cancel(order_id):
     auth_error = require_admin()
@@ -1754,7 +1688,7 @@ def startup():
     global streamer
 
     log.info("="*52)
-    log.info("  KTrade PRO — Alpaca Paper Trading Bridge")
+    log.info("  KTrade PRO â€” Alpaca Paper Trading Bridge")
     log.info("="*52)
 
     if not API_KEY or not API_SECRET:
@@ -1793,7 +1727,7 @@ def startup():
             streamer = PriceStreamer(all_tickers, on_live_price)
             streamer.start()
         else:
-            log.error("âŒ Could not connect to Alpaca — check your API keys")
+            log.error("âŒ Could not connect to Alpaca â€” check your API keys")
             log.info("   Running in DEMO mode")
             state["mode"] = "demo"
 

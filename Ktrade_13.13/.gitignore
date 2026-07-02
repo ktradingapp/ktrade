@@ -1,0 +1,19 @@
+.env
+.venv/
+__pycache__/
+.cache/
+*.pyc
+*.pyo
+*.log
+ktrade_agent.log
+ktrade_merged.log
+ktrade_bridge.stderr.log
+ktrade_bridge.stdout.log
+trade_journal.csv
+data/ktrade_scan_latest.json
+PROJECT_DOCUMENTATION_PACKAGE/
+.DS_Store
+Thumbs.db
+# Local runtime / secrets / generated artifacts
+ktrade_vectorbt.log
+ktrade_intraday_vectorbt.log
