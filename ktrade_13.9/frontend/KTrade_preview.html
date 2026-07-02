@@ -1,9 +1,9 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KTrade â€” Command</title>
+<title>KTrade — Command</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;500;600;700;800&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -13,13 +13,13 @@
     --lapis-2:#1A1550;        /* raised panel */
     --lapis-3:#241D63;        /* hover / inset */
     --ink:#0D0A28;            /* deepest shadow */
-    --gold:#E8B53A;           /* gold leaf â€” rules, headers, the wordmark */
+    --gold:#E8B53A;           /* gold leaf — rules, headers, the wordmark */
     --gold-soft:#A98A3E;      /* dimmed gold for fine rules */
     --peacock:#16B89C;        /* gain / go */
     --sindoor:#E84656;        /* loss / danger / kill */
     --marigold:#F5901E;       /* pending / warning */
     --rose:#E0539B;           /* tertiary highlight, used rarely */
-    --ivory:#F1E6CC;          /* primary text â€” old paper */
+    --ivory:#F1E6CC;          /* primary text — old paper */
     --ivory-dim:#B9AE92;      /* secondary text */
     --ivory-faint:#7C7569;    /* captions */
     --line:rgba(232,181,58,.22);
@@ -42,7 +42,7 @@
     -webkit-font-smoothing:antialiased;
     line-height:1.45;
   }
-  /* jali lattice watermark â€” barely-there octagonal screen, the texture of carved stone */
+  /* jali lattice watermark — barely-there octagonal screen, the texture of carved stone */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.05;
     background-image:
@@ -121,7 +121,7 @@
   .corner.bl{bottom:-4px;left:-4px}.corner.br{bottom:-4px;right:-4px}
   .ptitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
-  .eyebrow::before{content:"â–";margin-right:9px;color:var(--gold-soft);font-size:10px}
+  .eyebrow::before{content:"❖";margin-right:9px;color:var(--gold-soft);font-size:10px}
   .note{font-family:var(--mono);font-size:10.5px;color:var(--ivory-faint)}
 
   table{width:100%;border-collapse:collapse}
@@ -177,6 +177,31 @@
   .demo-flag{display:none;color:var(--marigold)}
   .is-demo .demo-flag{display:inline}
 
+
+  /* top agent control buttons: keep START / STOP / RUN ONE CYCLE side by side */
+  .top-agent-bar{
+    display:flex!important;align-items:center;justify-content:center;gap:12px;
+    flex-wrap:nowrap!important;margin:-8px 0 18px 0;padding:12px 16px;
+    background:linear-gradient(180deg, rgba(36,29,99,.55), rgba(26,21,80,.38));
+    border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035), 0 14px 32px -26px #000;
+  }
+  .top-agent-bar .btn{white-space:nowrap!important;min-width:138px;text-align:center;padding-left:14px;padding-right:14px;margin:0!important}
+  .top-agent-bar .label{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-right:4px;white-space:nowrap}
+
+
+  /* Latest Scan: show top 10 rows by default, scroll to view all returned rows */
+  #scan.scan-scroll{
+    max-height:625px;
+    overflow-y:auto;
+    padding-right:8px;
+    scrollbar-width:thin;
+  }
+  #scan.scan-scroll::-webkit-scrollbar{width:8px}
+  #scan.scan-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:999px}
+  #scan.scan-scroll::-webkit-scrollbar-thumb{background:rgba(247,184,43,.55);border-radius:999px}
+  #scan.scan-scroll .scanrow{min-height:58px}
+
   @media (max-width:1080px){
     .hero{grid-template-columns:1fr 1fr 1fr}
     .grid,.row2{grid-template-columns:1fr}
@@ -185,6 +210,7 @@
     .hero{grid-template-columns:1fr 1fr}
     .wordmark{font-size:25px}.cart.equity .v{font-size:34px}
     .toran{flex-wrap:wrap}
+    .top-agent-bar{overflow-x:auto;justify-content:flex-start}
   }
   :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
   @media (prefers-reduced-motion:reduce){ .chakra .spin{animation:none!important} }
@@ -193,7 +219,7 @@
 <body>
 <div class="wrap" id="app">
 
-  <!-- â–‘â–‘ toran / command bar â–‘â–‘ -->
+  <!-- ░░ toran / command bar ░░ -->
   <header class="toran">
     <div class="brand">
       <svg class="chakra" viewBox="0 0 100 100" aria-hidden="true">
@@ -204,28 +230,27 @@
         </g>
       </svg>
       <div>
-        <div class="wordmark">K<b>Â·</b>Trade</div>
+        <div class="wordmark">K<b>·</b>Trade</div>
         <div class="tag">Autonomous Trading Engine</div>
       </div>
     </div>
-    <div class="chip strat" id="chip-strat"><span class="dot"></span>Momentum Â· Bull</div>
+    <div class="chip strat" id="chip-strat"><span class="dot"></span>Momentum · Bull</div>
     <div class="chip paper" id="chip-mode">Paper</div>
     <div class="chip" id="chip-status"><span class="dot"></span>Idle</div>
-    <button id="b-token" class="chip" title="Set the KTrade admin token used for Start / Stop / Kill" style="cursor:pointer;font-family:var(--mono);background:rgba(255,255,255,.02)">âš¿ Token</button>
-    <button class="kill" id="kill" title="Emergency kill â€” disable agent, cancel orders, optional flatten">Kill Switch</button>
+    <button id="b-token" class="chip" title="Set the KTrade admin token used for Start / Stop / Kill" style="cursor:pointer;font-family:var(--mono);background:rgba(255,255,255,.02)">⚿ Token</button>
+    <button class="kill" id="kill" title="Emergency kill — disable agent, cancel orders, optional flatten">Kill Switch</button>
   </header>
 
-  <section class="top-agent-bar" style="display:flex;align-items:center;gap:12px;flex-wrap:nowrap;margin:14px 0 18px 0;">
-    <span class="eyebrow" style="margin-right:6px;">Agent Control</span>
-    <div class="controls" style="display:flex;gap:10px;flex-wrap:nowrap;margin:0;">
-      <button class="btn go"   id="b-start">Start Agent</button>
-      <button class="btn stop" id="b-stop" disabled>Stop Agent</button>
-      <button class="btn"      id="b-once">Run One Cycle</button>
-    </div>
+  <!-- ░░ top agent controls: always one row ░░ -->
+  <section class="top-agent-bar" aria-label="Agent controls">
+    <span class="label">Agent Control</span>
+    <button class="btn go"   id="b-start">Start Agent</button>
+    <button class="btn stop" id="b-stop" disabled>Stop Agent</button>
+    <button class="btn"      id="b-once">Run One Cycle</button>
   </section>
 
 
-  <!-- â–‘â–‘ hero cartouches â–‘â–‘ -->
+  <!-- ░░ hero cartouches ░░ -->
   <section class="hero">
     <div class="cart equity"><div class="k">Net Equity</div><div class="v" id="m-eq">$100,000</div><div class="sub" id="m-bp">Buying power $100,000</div></div>
     <div class="cart"><div class="k">Day P&amp;L</div><div class="v" id="m-pnl">+$0</div><div class="sub" id="m-pnlpct">+0.00% today</div></div>
@@ -234,42 +259,34 @@
     <div class="cart"><div class="k">Universe</div><div class="v" id="m-uni">66</div><div class="sub">scanned today</div></div>
   </section>
 
-  <!-- â–‘â–‘ main grid â–‘â–‘ -->
+  <!-- ░░ main grid ░░ -->
   <div class="grid">
     <!-- positions + controls -->
     <section class="panel"><div class="folio">
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
       <div class="ptitle"><span class="eyebrow">Open Positions</span><span class="note" id="recon">broker reconciled</span></div>
-
-<div id="ktrade-position-tabs" style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px 0;">
-  <button class="btn" onclick="ktradeShowPositionsV3()">POSITIONS</button>
-  <button class="btn" onclick="ktradeShowTradeHistoryV3()">TRADE HISTORY</button>
-</div>
-<div id="ktrade-position-panel" style="display:none;margin:10px 0;padding:14px;border:1px solid rgba(255,193,7,.35);border-radius:12px;background:rgba(20,15,70,.90);color:#fff;max-height:520px;overflow:auto;"></div>
-
-
       <div id="positions"></div>
 </div></section>
 
     <!-- latest scan -->
     <section class="panel"><div class="folio">
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
-      <div class="ptitle"><span class="eyebrow">Latest Scan</span><span class="note">conviction ranked</span></div>
+      <div class="ptitle"><span class="eyebrow">Latest Scan</span><span class="note" id="scan-note">top 10 visible · scroll all</span></div>
       <div id="scan"></div>
     </div></section>
   </div>
 
-  <!-- â–‘â–‘ performance + journal â–‘â–‘ -->
+  <!-- ░░ performance + journal ░░ -->
   <div class="row2">
     <section class="panel"><div class="folio">
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
       <div class="ptitle"><span class="eyebrow">Performance</span></div>
-      <div class="stat"><span class="l">Record</span><span class="n" id="p-rec">0 W Â· 0 L</span></div>
+      <div class="stat"><span class="l">Record</span><span class="n" id="p-rec">0 W · 0 L</span></div>
       <div class="winbar"><i id="p-winbar" style="width:50%"></i></div>
-      <div class="stat" style="margin-top:8px"><span class="l">Win rate</span><span class="n" id="p-win">â€”</span></div>
-      <div class="stat"><span class="l">Avg win</span><span class="n up" id="p-aw">â€”</span></div>
-      <div class="stat"><span class="l">Avg loss</span><span class="n down" id="p-al">â€”</span></div>
-      <div class="stat"><span class="l">Realized P&amp;L</span><span class="n" id="p-real">â€”</span></div>
+      <div class="stat" style="margin-top:8px"><span class="l">Win rate</span><span class="n" id="p-win">—</span></div>
+      <div class="stat"><span class="l">Avg win</span><span class="n up" id="p-aw">—</span></div>
+      <div class="stat"><span class="l">Avg loss</span><span class="n down" id="p-al">—</span></div>
+      <div class="stat"><span class="l">Realized P&amp;L</span><span class="n" id="p-real">—</span></div>
     </div></section>
 
     <section class="panel"><div class="folio">
@@ -282,7 +299,7 @@
     </div></section>
   </div>
 
-  <div class="foot">KTrade <b>v13.9</b> Â· OctagonIT Product <span class="demo-flag">Â· showing sample data â€” backend not reached</span></div>
+  <div class="foot">KTrade <b>v13.9</b> · OctagonIT Product <span class="demo-flag">· showing sample data — backend not reached</span></div>
 </div>
 
 <script>
@@ -297,7 +314,7 @@ const API = "/api";  // nginx proxies /api/ to Flask backend
 /* ---- formatting ---- */
 const money=n=>(n<0?"-$":"$")+Math.abs(n).toLocaleString("en-US",{maximumFractionDigits:0});
 const money2=n=>(n<0?"-$":"$")+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-const signed=n=>(n>=0?"+":"âˆ’")+"$"+Math.abs(n).toLocaleString("en-US",{maximumFractionDigits:0});
+const signed=n=>(n>=0?"+":"−")+"$"+Math.abs(n).toLocaleString("en-US",{maximumFractionDigits:0});
 const cls=n=>n>0?"up":n<0?"down":"";
 
 /* ---- sample data so the folio is alive even before the backend answers ---- */
@@ -329,7 +346,7 @@ function renderHero(a, risk, posCount, posCap, uni){
   $("m-eq").textContent=money(a.equity);
   $("m-bp").textContent="Buying power "+money(a.buying_power);
   const p=a.day_pnl||0; const pe=$("m-pnl"); pe.textContent=signed(p); pe.className="v "+cls(p);
-  const pp=$("m-pnlpct"); pp.textContent=(p>=0?"+":"âˆ’")+Math.abs(a.day_pnl_pct||0).toFixed(2)+"% today"; pp.className="sub "+cls(p);
+  const pp=$("m-pnlpct"); pp.textContent=(p>=0?"+":"−")+Math.abs(a.day_pnl_pct||0).toFixed(2)+"% today"; pp.className="sub "+cls(p);
   const r=$("m-risk"); r.textContent=(risk||0).toFixed(1)+"%"; r.className="v "+(risk>8?"down":risk>4?"warn":"");
   $("m-pos").textContent=posCount;
   $("m-poscap").textContent="of "+posCap+" max";
@@ -338,7 +355,7 @@ function renderHero(a, risk, posCount, posCap, uni){
 
 function renderPositions(rows){
   const host=$("positions");
-  if(!rows||!rows.length){host.innerHTML='<div class="empty">No open positions â€” the agent is flat.</div>';return;}
+  if(!rows||!rows.length){host.innerHTML='<div class="empty">No open positions — the agent is flat.</div>';return;}
   let h='<table><thead><tr><th>Symbol</th><th>Qty</th><th>Avg</th><th>Last</th><th>P&L</th></tr></thead><tbody>';
   for(const p of rows){
     const pnl=p.pnl||0;
@@ -351,25 +368,41 @@ function renderPositions(rows){
 
 function renderScan(rows){
   const host=$("scan");
-  if(!rows||!rows.length){host.innerHTML='<div class="empty">No scan yet â€” run a cycle.</div>';return;}
-  const max=Math.max(...rows.map(r=>r.conv),100);
-  host.innerHTML=rows.map((r,i)=>{
+  const note=$("scan-note");
+  host.classList.add("scan-scroll");
+  if(!rows||!rows.length){
+    if(note) note.textContent="top 10 visible · scroll all";
+    host.innerHTML='<div class="empty">No scan yet — run a cycle.</div>';
+    return;
+  }
+
+  // Render every returned scan row, but keep the panel height to about 10 rows.
+  // User can scroll inside Latest Scan to see the full list.
+  const visibleDefault=10;
+  const sorted=[...rows].sort((a,b)=>(+b.conv||0)-(+a.conv||0));
+  if(note) note.textContent=sorted.length>visibleDefault
+    ? `top ${visibleDefault} visible · ${sorted.length} total`
+    : `${sorted.length} shown`;
+
+  const max=Math.max(...sorted.map(r=>+r.conv||0),100);
+  host.innerHTML=sorted.map((r,i)=>{
     const buy=(r.action||"").toUpperCase()==="BUY";
     const actCls=buy?"side-buy":"";
+    const conv=Math.round(+r.conv||0);
     return `<div class="scanrow"><span class="rank">${String(i+1).padStart(2,"0")}</span>
       <div><span class="scan-sym">${r.ticker}</span><span class="scan-act ${actCls}">${r.action}</span>
-        <div class="meter" style="margin-top:7px"><i style="width:${Math.round(r.conv/max*100)}%"></i></div></div>
-      <span class="conv">${r.conv}</span></div>`;
+        <div class="meter" style="margin-top:7px"><i style="width:${Math.round(conv/max*100)}%"></i></div></div>
+      <span class="conv">${conv}</span></div>`;
   }).join("");
 }
 
 function renderPerf(p){
   const tot=p.w+p.l;
-  $("p-rec").textContent=`${p.w} W Â· ${p.l} L`;
+  $("p-rec").textContent=`${p.w} W · ${p.l} L`;
   $("p-winbar").style.width=(tot?p.w/tot*100:50)+"%";
-  $("p-win").textContent=tot?Math.round(p.w/tot*100)+"%":"â€”";
-  $("p-aw").textContent=p.avgWin?signed(p.avgWin):"â€”";
-  $("p-al").textContent=p.avgLoss?signed(p.avgLoss):"â€”";
+  $("p-win").textContent=tot?Math.round(p.w/tot*100)+"%":"—";
+  $("p-aw").textContent=p.avgWin?signed(p.avgWin):"—";
+  $("p-al").textContent=p.avgLoss?signed(p.avgLoss):"—";
   const re=$("p-real"); re.textContent=signed(p.real||0); re.className="n "+cls(p.real||0);
 }
 
@@ -425,7 +458,7 @@ async function controlPost(path, body={}){
   catch(e){
     const m=String(e.message||e);
     alert((m.startsWith("401")||m.startsWith("403"))
-      ? "Not authorized ("+m+").\n\nClick â€œTokenâ€ and enter your KTRADE_ADMIN_TOKEN, then retry."
+      ? "Not authorized ("+m+").\n\nClick “Token” and enter your KTRADE_ADMIN_TOKEN, then retry."
       : "Request failed: "+m);
     return false;
   }
@@ -450,7 +483,7 @@ async function refresh(){
     // scan + perf + journal: keep sample until wired to /scan and /closed_trades
     let journal=DEMO.journal, perf=DEMO.perf;
     try{ const ct=await get("/closed_trades",5000);
-      if(Array.isArray(ct)&&ct.length){ journal=ct.slice(0,8).map(t=>({t:(t.exit_time||"").slice(11,16)||"â€”",
+      if(Array.isArray(ct)&&ct.length){ journal=ct.slice(0,8).map(t=>({t:(t.exit_time||"").slice(11,16)||"—",
         sym:t.ticker, side:(t.side||"sell"), qty:+t.qty||0, px:+t.exit_price||+t.price||0, pnl:+t.pnl||0})); }
     }catch(_){}
     const scanRows=(all.signals||all.scan||[]).map(s=>({
@@ -473,8 +506,8 @@ $("b-start").onclick=async()=>{ if(await controlPost("/auto/start")){ setStatus(
 $("b-stop").onclick =async()=>{ if(await controlPost("/auto/stop")){ setStatus(false); } refresh(); };
 $("b-once").onclick =async()=>{ if(await controlPost("/auto/run-once")){ setTimeout(refresh,1500); } };
 $("kill").onclick   =async()=>{
-  if(!confirm("EMERGENCY KILL â€” disable the agent now?")) return;
-  const flatten=confirm("Also FLATTEN all open positions and cancel resting orders?\n\nOK = kill + flatten   Â·   Cancel = kill only");
+  if(!confirm("EMERGENCY KILL — disable the agent now?")) return;
+  const flatten=confirm("Also FLATTEN all open positions and cancel resting orders?\n\nOK = kill + flatten   ·   Cancel = kill only");
   if(await controlPost("/emergency/kill",{flatten})){ setStatus(false); }
   refresh();
 };
@@ -484,180 +517,5 @@ paint(DEMO); markDemo(true); setStatus(false);
 refresh();
 setInterval(refresh, 6000);
 </script>
-
-<script id="ktrade-dynamic-backend-tables-v1">
-function ktPanelDynamic(){
-  let panel = document.getElementById("ktrade-position-panel");
-  if (!panel) {
-    panel = document.createElement("div");
-    panel.id = "ktrade-position-panel";
-    panel.style.cssText = "display:block;margin:10px 0;padding:14px;border:1px solid rgba(255,193,7,.35);border-radius:12px;background:rgba(20,15,70,.90);color:#fff;max-height:520px;overflow:auto;";
-    document.body.prepend(panel);
-  }
-  panel.style.display = "block";
-  return panel;
-}
-
-function ktEscapeHtml(v){
-  if (v === null || v === undefined) return "";
-  return String(v)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function ktFormatBackendValue(v){
-  if (v === null || v === undefined) return "";
-  if (typeof v === "object") return ktEscapeHtml(JSON.stringify(v));
-  return ktEscapeHtml(v);
-}
-
-function ktCollectColumns(rows){
-  const cols = [];
-  const seen = new Set();
-  rows.forEach(row => {
-    if (!row || typeof row !== "object") return;
-    Object.keys(row).forEach(k => {
-      if (!seen.has(k)) {
-        seen.add(k);
-        cols.push(k);
-      }
-    });
-  });
-  return cols;
-}
-
-function ktRenderDynamicTable(title, rows, detailFnName){
-  if (!rows || !rows.length) {
-    return `<b>${title}</b><br>No data found.`;
-  }
-
-  const cols = ktCollectColumns(rows);
-
-  let html = `
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
-      <b>${title}</b>
-      <span style="opacity:.8;font-size:12px;">${rows.length} row(s)</span>
-    </div>
-    <div style="overflow:auto;">
-    <table style="width:100%;border-collapse:collapse;font-size:12px;">
-      <thead>
-        <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,.2);">
-  `;
-
-  cols.forEach(col => {
-    html += `<th style="padding:8px;white-space:nowrap;">${ktEscapeHtml(col)}</th>`;
-  });
-
-  html += `
-        </tr>
-      </thead>
-      <tbody>
-  `;
-
-  rows.forEach((row, i) => {
-    const click = detailFnName ? `onclick="${detailFnName}(${i})"` : "";
-    const cursor = detailFnName ? "cursor:pointer;" : "";
-    html += `<tr ${click} style="${cursor}border-bottom:1px solid rgba(255,255,255,.08);">`;
-
-    cols.forEach(col => {
-      html += `<td style="padding:8px;white-space:nowrap;">${ktFormatBackendValue(row[col])}</td>`;
-    });
-
-    html += `</tr>`;
-  });
-
-  html += `
-      </tbody>
-    </table>
-    </div>
-  `;
-
-  return html;
-}
-
-async function ktradeShowPositionsV3(){
-  const panel = ktPanelDynamic();
-  panel.innerHTML = "Loading current positions...";
-
-  try {
-    const r = await fetch((typeof API !== "undefined" ? API : "/api") + "/all", {cache:"no-store"});
-    const j = await r.json();
-
-    let positions = [];
-    if (Array.isArray(j.positions)) positions = j.positions;
-    else if (Array.isArray(j.open_positions)) positions = j.open_positions;
-    else if (j.account && Array.isArray(j.account.positions)) positions = j.account.positions;
-
-    window.ktradePositionsBackendRows = positions;
-
-    panel.innerHTML =
-      ktRenderDynamicTable("CURRENT OPEN POSITIONS", positions, null) +
-      `<details style="margin-top:12px;">
-        <summary style="cursor:pointer;">Raw backend positions response</summary>
-        <pre style="white-space:pre-wrap;background:rgba(0,0,0,.25);padding:10px;border-radius:8px;">${ktEscapeHtml(JSON.stringify(positions, null, 2))}</pre>
-      </details>`;
-
-  } catch(e) {
-    panel.innerHTML = "Failed to load current positions: " + e;
-  }
-}
-
-async function ktradeShowTradeHistoryV3(){
-  const panel = ktPanelDynamic();
-  panel.innerHTML = "Loading trade history...";
-
-  try {
-    let r = await fetch((typeof API !== "undefined" ? API : "/api") + "/closed_trades", {cache:"no-store"});
-    let j = await r.json();
-
-    let trades = [];
-    if (Array.isArray(j)) trades = j;
-    else if (Array.isArray(j.closed_trades)) trades = j.closed_trades;
-    else if (Array.isArray(j.trades)) trades = j.trades;
-    else if (Array.isArray(j.orders)) trades = j.orders;
-    else if (Array.isArray(j.data)) trades = j.data;
-
-    if (!trades.length) {
-      const r2 = await fetch((typeof API !== "undefined" ? API : "/api") + "/all", {cache:"no-store"});
-      const j2 = await r2.json();
-
-      if (Array.isArray(j2.recent_orders)) trades = j2.recent_orders;
-      else if (Array.isArray(j2.orders)) trades = j2.orders;
-      else if (Array.isArray(j2.trade_history)) trades = j2.trade_history;
-    }
-
-    window.ktradeTradeHistoryBackendRows = trades;
-
-    panel.innerHTML =
-      ktRenderDynamicTable("TRADE HISTORY", trades, "ktradeOpenTradeDetailV3") +
-      `<div id="ktrade-trade-detail-v3" style="display:none;margin-top:14px;padding:12px;border:1px solid rgba(255,193,7,.35);border-radius:10px;background:rgba(0,0,0,.25);"></div>
-       <details style="margin-top:12px;">
-        <summary style="cursor:pointer;">Raw backend trade history response</summary>
-        <pre style="white-space:pre-wrap;background:rgba(0,0,0,.25);padding:10px;border-radius:8px;">${ktEscapeHtml(JSON.stringify(trades, null, 2))}</pre>
-      </details>`;
-
-  } catch(e) {
-    panel.innerHTML = "Failed to load trade history: " + e;
-  }
-}
-
-function ktradeOpenTradeDetailV3(i){
-  const detail = document.getElementById("ktrade-trade-detail-v3");
-  const trades = window.ktradeTradeHistoryBackendRows || [];
-  const t = trades[i];
-
-  if (!detail || !t) return;
-
-  detail.style.display = "block";
-  detail.innerHTML = `
-    <b>TRADE DETAIL</b>
-    <pre style="white-space:pre-wrap;margin-top:8px;background:rgba(0,0,0,.25);padding:10px;border-radius:8px;">${ktEscapeHtml(JSON.stringify(t, null, 2))}</pre>
-  `;
-}
-</script>
-
 </body>
 </html>
