@@ -1,0 +1,89 @@
+KTrade v10.3 - OpenAI + FinBERT Sentiment Integration Guide
+===========================================================
+
+What was added
+--------------
+This project now has an optional AI sentiment layer:
+
+Finnhub News -> FinBERT sentiment score -> OpenAI explanation -> Dashboard confirmation/warning
+
+Important: sentiment is confirmation only. It does not place trades by itself.
+
+Files added/updated
+-------------------
+1. data\openai_finbert_sentiment.py
+   Use: Main sentiment engine.
+   It reads Finnhub news, scores financial sentiment, and creates a clean result.
+   It uses FinBERT if transformers/torch are installed.
+   It uses OpenAI if OPENAI_API_KEY is configured.
+   If either AI package is missing, it falls back safely.
+
+2. backend\ktrade_alpaca.py
+   Use: Backend server.
+   New endpoint: /sentiment/<ticker>
+   Example: http://localhost:5001/sentiment/AAPL
+
+3. frontend\KTrade_preview.html
+   Use: Dashboard.
+   New: signal cards show AI sentiment badge and explanation when available.
+
+4. .env and .env.template
+   New settings:
+   OPENAI_API_KEY=
+   OPENAI_SENTIMENT_MODEL=gpt-4o-mini
+   KTRADE_ENABLE_OPENAI_SENTIMENT=true
+   KTRADE_ENABLE_FINBERT=true
+   KTRADE_SENTIMENT_TTL_SECONDS=1800
+
+5. requirements.txt
+   Added OpenAI package.
+   FinBERT dependencies are listed as optional because they are heavy for small servers.
+
+How to configure OpenAI
+-----------------------
+Open:
+C:	rading-agent\Ktrade_v10_3\.env
+
+Add:
+OPENAI_API_KEY=your_openai_key_here
+
+How to install OpenAI package
+-----------------------------
+cd /d C:	rading-agent\Ktrade_v10_3
+.venv\Scripts\pip.exe install openai
+
+How to install local FinBERT packages, optional
+-----------------------------------------------
+Only do this if your machine/server has enough RAM.
+
+cd /d C:	rading-agent\Ktrade_v10_3
+.venv\Scripts\pip.exe install transformers torch
+
+If you do not install transformers/torch, the project still works using keyword fallback sentiment.
+
+How to run
+----------
+CMD 1:
+cd /d C:	rading-agent\Ktrade_v10_3
+.venv\Scripts\python.exe backend\ktrade_alpaca.py
+
+CMD 2:
+cd /d C:	rading-agent\Ktrade_v10_3
+RUN_SCANNER_FINNHUB_DAILY.cmd
+
+Open dashboard:
+http://localhost:5001
+
+Test sentiment manually:
+http://localhost:5001/sentiment/AAPL
+
+How to read dashboard sentiment
+-------------------------------
+Positive sentiment + BUY strategy = sentiment supports the BUY signal.
+Negative sentiment + BUY strategy = dashboard shows warning/review message.
+Neutral sentiment = no strong confirmation.
+
+Final rule
+----------
+Strategy and risk engine decide trades.
+Sentiment only confirms or warns.
