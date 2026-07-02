@@ -211,6 +211,11 @@
     <div class="chip strat" id="chip-strat"><span class="dot"></span>Momentum · Bull</div>
     <div class="chip paper" id="chip-mode">Paper</div>
     <div class="chip" id="chip-status"><span class="dot"></span>Idle</div>
+    <div id="top-agent-controls" class="controls" style="margin:0 4px 0 0;align-items:center;">
+      <button class="btn go"   id="b-start">Start Agent</button>
+      <button class="btn stop" id="b-stop" disabled>Stop Agent</button>
+      <button class="btn"      id="b-once">Run One Cycle</button>
+    </div>
     <button id="b-token" class="chip" title="Set the KTrade admin token used for Start / Stop / Kill" style="cursor:pointer;font-family:var(--mono);background:rgba(255,255,255,.02)">⚿ Token</button>
     <button class="kill" id="kill" title="Emergency kill — disable agent, cancel orders, optional flatten">Kill Switch</button>
   </header>
@@ -231,14 +236,7 @@
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
       <div class="ptitle"><span class="eyebrow">Open Positions</span><span class="note" id="recon">broker reconciled</span></div>
       <div id="positions"></div>
-
-      <div class="ptitle" style="margin-top:22px"><span class="eyebrow">Agent Control</span><span class="note">paper order routing</span></div>
-      <div class="controls">
-        <button class="btn go"   id="b-start">Start Agent</button>
-        <button class="btn stop" id="b-stop" disabled>Stop Agent</button>
-        <button class="btn"      id="b-once">Run One Cycle</button>
-      </div>
-    </div></section>
+</div></section>
 
     <!-- latest scan -->
     <section class="panel"><div class="folio">
@@ -271,12 +269,12 @@
     </div></section>
   </div>
 
-  <div class="foot">KTrade <b>v13.9</b> · iT LLC <span class="demo-flag">· showing sample data — backend not reached</span></div>
+  <div class="foot">KTrade <b>v13.9</b> · OctagonIT Product <span class="demo-flag">· showing sample data — backend not reached</span></div>
 </div>
 
 <script>
 "use strict";
-const API = "";  // relative → served by the Flask backend at /. Set to "http://localhost:5001" for cross-origin dev.
+const API = "/api";  // nginx proxies /api/ to Flask backend
 
 /* ---- spokes for the chakra (24, the traditional count) ---- */
 (()=>{const g=document.getElementById("spokes");let s="";for(let i=0;i<24;i++){const a=i*15*Math.PI/180;
