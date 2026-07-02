@@ -85,6 +85,13 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
           ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
+      - name: Upload VPS deploy script
+        run: |
+          scp "server_scripts/deploy_ktrade_release.sh" \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/deploy_ktrade_release.sh"
+
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "chmod +x /opt/deploy_ktrade_release.sh"
 
       - name: Upload zip to VPS
         run: |
