@@ -162,6 +162,18 @@ ln -sfn "$RELEASE_DIR" "$CURRENT_LINK"
 echo "Reloading systemd and restarting KTrade services..."
 systemctl daemon-reload
 
+# Install/restart scan + VectorBT timers from the release source so future deploys keep
+# the same working command used manually: yfinance provider + --force.
+echo "Installing/restarting KTrade scan timers..."
+if [ -f "$CURRENT_LINK/scripts/install_ktrade_daily_timers.sh" ]; then
+  bash "$CURRENT_LINK/scripts/install_ktrade_daily_timers.sh" "$CURRENT_LINK" || true
+  systemctl daemon-reload
+  systemctl enable --now ktrade-intraday-all.timer ktrade-daily-all.timer || true
+  systemctl restart ktrade-intraday-all.timer ktrade-daily-all.timer || true
+else
+  echo "No scripts/install_ktrade_daily_timers.sh found; skipping scan timer install"
+fi
+
 systemctl stop ktrade-backend.service 2>/dev/null || true
 systemctl stop ktrade-agent.service 2>/dev/null || true
 systemctl stop ktrade-scheduler.service 2>/dev/null || true
@@ -196,6 +208,11 @@ if [ "$BACKEND_OK" != "1" ]; then
   journalctl -u ktrade-backend.service -n 160 --no-pager || true
   exit 7
 fi
+
+# Kick one scan after deploy in the background so the UI gets real Latest Scan rows
+# without waiting for the next timer. The service can take several minutes, so use --no-block.
+echo "Starting one immediate intraday scan after deploy..."
+systemctl start ktrade-intraday-all.service --no-block || true
 
 echo "Deploy complete: $VERSION"
 echo "Current release: $(readlink -f "$CURRENT_LINK")"

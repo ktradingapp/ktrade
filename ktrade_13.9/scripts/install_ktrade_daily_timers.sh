@@ -22,7 +22,8 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=$APP_DIR
 EnvironmentFile=-$APP_DIR/.env
-ExecStart=$PY $APP_DIR/ktrade_daily_runner.py daily
+Environment=KTRADE_DATA_PROVIDER=yfinance
+ExecStart=$PY $APP_DIR/ktrade_daily_runner.py daily --force
 User=root
 EOF
 
@@ -36,7 +37,8 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=$APP_DIR
 EnvironmentFile=-$APP_DIR/.env
-ExecStart=$PY $APP_DIR/ktrade_daily_runner.py intraday
+Environment=KTRADE_DATA_PROVIDER=yfinance
+ExecStart=$PY $APP_DIR/ktrade_daily_runner.py intraday --force
 User=root
 EOF
 
@@ -68,6 +70,7 @@ EOF
 
 systemctl daemon-reload
 systemctl enable --now ktrade-daily-all.timer ktrade-intraday-all.timer
+systemctl restart ktrade-daily-all.timer ktrade-intraday-all.timer
 
-echo "Installed KTrade daily automation timers."
+echo "Installed/restarted KTrade daily automation timers."
 systemctl list-timers 'ktrade-*all.timer' --no-pager

@@ -265,6 +265,14 @@
     <section class="panel"><div class="folio">
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
       <div class="ptitle"><span class="eyebrow">Open Positions</span><span class="note" id="recon">broker reconciled</span></div>
+
+<div id="ktrade-position-tabs" style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px 0;">
+  <button class="btn" onclick="ktradeShowPositionsV3()">POSITIONS</button>
+  <button class="btn" onclick="ktradeShowTradeHistoryV3()">TRADE HISTORY</button>
+</div>
+<div id="ktrade-position-panel" style="display:none;margin:10px 0;padding:14px;border:1px solid rgba(255,193,7,.35);border-radius:12px;background:rgba(20,15,70,.90);color:#fff;max-height:520px;overflow:auto;"></div>
+
+
       <div id="positions"></div>
 </div></section>
 
@@ -356,12 +364,18 @@ function renderHero(a, risk, posCount, posCap, uni){
 function renderPositions(rows){
   const host=$("positions");
   if(!rows||!rows.length){host.innerHTML='<div class="empty">No open positions — the agent is flat.</div>';return;}
-  let h='<table><thead><tr><th>Symbol</th><th>Qty</th><th>Avg</th><th>Last</th><th>P&L</th></tr></thead><tbody>';
+  let h='<table><thead><tr><th>Symbol</th><th>Qty</th><th>Avg</th><th>Last</th><th>Market</th><th>P&L</th><th>Action</th></tr></thead><tbody>';
   for(const p of rows){
-    const pnl=p.pnl||0;
-    h+=`<tr><td><span class="sym">${p.ticker}</span></td><td class="muted">${p.qty}</td>
-      <td class="muted">${money2(p.avg||0)}</td><td>${money2(p.price||0)}</td>
-      <td class="${cls(pnl)}">${signed(pnl)}</td></tr>`;
+    const ticker=(p.ticker||p.symbol||"").toString().toUpperCase();
+    const pnl=+(p.pnl||p.unrealized_pl||0);
+    const qty=p.qty??p.shares??0;
+    const avg=p.avg??p.avg_entry_price??0;
+    const price=p.price??p.current_price??0;
+    const market=p.market??p.market_value??(Number(qty)*Number(price)||0);
+    h+=`<tr><td><span class="sym">${ticker}</span></td><td class="muted">${qty}</td>
+      <td class="muted">${money2(avg||0)}</td><td>${money2(price||0)}</td><td>${money2(market||0)}</td>
+      <td class="${cls(pnl)}">${signed(pnl)}</td>
+      <td><button class="btn stop" style="padding:7px 10px;font-size:11px" onclick="ktradeClosePosition('${ticker}')">Close</button></td></tr>`;
   }
   host.innerHTML=h+'</tbody></table>';
 }
@@ -416,6 +430,22 @@ function renderJournal(rows){
       <td><span class="scan-act ${r.side==="buy"?"side-buy":"side-sell"}">${r.side}</span></td>
       <td class="muted">${r.qty}</td><td>${money2(r.px)}</td><td>${pnlCell}</td></tr>`;
   }).join("");
+}
+
+
+async function ktradeClosePosition(ticker){
+  ticker = String(ticker||"").toUpperCase().trim();
+  if(!ticker) return;
+  if(!confirm(`Close ${ticker} position and cancel open orders for this symbol?`)) return;
+  try{
+    await post("/close_position", {ticker}, 15000);
+    setTimeout(refresh, 1200);
+  }catch(e){
+    const m=String(e.message||e);
+    alert((m.startsWith("401")||m.startsWith("403"))
+      ? "Not authorized ("+m+").\n\nClick Token and enter your KTRADE_ADMIN_TOKEN, then retry."
+      : "Close position failed: "+m);
+  }
 }
 
 function setStatus(isRunning){
@@ -517,5 +547,180 @@ paint(DEMO); markDemo(true); setStatus(false);
 refresh();
 setInterval(refresh, 6000);
 </script>
+
+<script id="ktrade-dynamic-backend-tables-v1">
+function ktPanelDynamic(){
+  let panel = document.getElementById("ktrade-position-panel");
+  if (!panel) {
+    panel = document.createElement("div");
+    panel.id = "ktrade-position-panel";
+    panel.style.cssText = "display:block;margin:10px 0;padding:14px;border:1px solid rgba(255,193,7,.35);border-radius:12px;background:rgba(20,15,70,.90);color:#fff;max-height:520px;overflow:auto;";
+    document.body.prepend(panel);
+  }
+  panel.style.display = "block";
+  return panel;
+}
+
+function ktEscapeHtml(v){
+  if (v === null || v === undefined) return "";
+  return String(v)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function ktFormatBackendValue(v){
+  if (v === null || v === undefined) return "";
+  if (typeof v === "object") return ktEscapeHtml(JSON.stringify(v));
+  return ktEscapeHtml(v);
+}
+
+function ktCollectColumns(rows){
+  const cols = [];
+  const seen = new Set();
+  rows.forEach(row => {
+    if (!row || typeof row !== "object") return;
+    Object.keys(row).forEach(k => {
+      if (!seen.has(k)) {
+        seen.add(k);
+        cols.push(k);
+      }
+    });
+  });
+  return cols;
+}
+
+function ktRenderDynamicTable(title, rows, detailFnName){
+  if (!rows || !rows.length) {
+    return `<b>${title}</b><br>No data found.`;
+  }
+
+  const cols = ktCollectColumns(rows);
+
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+      <b>${title}</b>
+      <span style="opacity:.8;font-size:12px;">${rows.length} row(s)</span>
+    </div>
+    <div style="overflow:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,.2);">
+  `;
+
+  cols.forEach(col => {
+    html += `<th style="padding:8px;white-space:nowrap;">${ktEscapeHtml(col)}</th>`;
+  });
+
+  html += `
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  rows.forEach((row, i) => {
+    const click = detailFnName ? `onclick="${detailFnName}(${i})"` : "";
+    const cursor = detailFnName ? "cursor:pointer;" : "";
+    html += `<tr ${click} style="${cursor}border-bottom:1px solid rgba(255,255,255,.08);">`;
+
+    cols.forEach(col => {
+      html += `<td style="padding:8px;white-space:nowrap;">${ktFormatBackendValue(row[col])}</td>`;
+    });
+
+    html += `</tr>`;
+  });
+
+  html += `
+      </tbody>
+    </table>
+    </div>
+  `;
+
+  return html;
+}
+
+async function ktradeShowPositionsV3(){
+  const panel = ktPanelDynamic();
+  panel.innerHTML = "Loading current positions...";
+
+  try {
+    const r = await fetch((typeof API !== "undefined" ? API : "/api") + "/all", {cache:"no-store"});
+    const j = await r.json();
+
+    let positions = [];
+    if (Array.isArray(j.positions)) positions = j.positions;
+    else if (Array.isArray(j.open_positions)) positions = j.open_positions;
+    else if (j.account && Array.isArray(j.account.positions)) positions = j.account.positions;
+
+    window.ktradePositionsBackendRows = positions;
+
+    panel.innerHTML =
+      ktRenderDynamicTable("CURRENT OPEN POSITIONS", positions, null) +
+      `<details style="margin-top:12px;">
+        <summary style="cursor:pointer;">Raw backend positions response</summary>
+        <pre style="white-space:pre-wrap;background:rgba(0,0,0,.25);padding:10px;border-radius:8px;">${ktEscapeHtml(JSON.stringify(positions, null, 2))}</pre>
+      </details>`;
+
+  } catch(e) {
+    panel.innerHTML = "Failed to load current positions: " + e;
+  }
+}
+
+async function ktradeShowTradeHistoryV3(){
+  const panel = ktPanelDynamic();
+  panel.innerHTML = "Loading trade history...";
+
+  try {
+    let r = await fetch((typeof API !== "undefined" ? API : "/api") + "/closed_trades", {cache:"no-store"});
+    let j = await r.json();
+
+    let trades = [];
+    if (Array.isArray(j)) trades = j;
+    else if (Array.isArray(j.closed_trades)) trades = j.closed_trades;
+    else if (Array.isArray(j.trades)) trades = j.trades;
+    else if (Array.isArray(j.orders)) trades = j.orders;
+    else if (Array.isArray(j.data)) trades = j.data;
+
+    if (!trades.length) {
+      const r2 = await fetch((typeof API !== "undefined" ? API : "/api") + "/all", {cache:"no-store"});
+      const j2 = await r2.json();
+
+      if (Array.isArray(j2.recent_orders)) trades = j2.recent_orders;
+      else if (Array.isArray(j2.orders)) trades = j2.orders;
+      else if (Array.isArray(j2.trade_history)) trades = j2.trade_history;
+    }
+
+    window.ktradeTradeHistoryBackendRows = trades;
+
+    panel.innerHTML =
+      ktRenderDynamicTable("TRADE HISTORY", trades, "ktradeOpenTradeDetailV3") +
+      `<div id="ktrade-trade-detail-v3" style="display:none;margin-top:14px;padding:12px;border:1px solid rgba(255,193,7,.35);border-radius:10px;background:rgba(0,0,0,.25);"></div>
+       <details style="margin-top:12px;">
+        <summary style="cursor:pointer;">Raw backend trade history response</summary>
+        <pre style="white-space:pre-wrap;background:rgba(0,0,0,.25);padding:10px;border-radius:8px;">${ktEscapeHtml(JSON.stringify(trades, null, 2))}</pre>
+      </details>`;
+
+  } catch(e) {
+    panel.innerHTML = "Failed to load trade history: " + e;
+  }
+}
+
+function ktradeOpenTradeDetailV3(i){
+  const detail = document.getElementById("ktrade-trade-detail-v3");
+  const trades = window.ktradeTradeHistoryBackendRows || [];
+  const t = trades[i];
+
+  if (!detail || !t) return;
+
+  detail.style.display = "block";
+  detail.innerHTML = `
+    <b>TRADE DETAIL</b>
+    <pre style="white-space:pre-wrap;margin-top:8px;background:rgba(0,0,0,.25);padding:10px;border-radius:8px;">${ktEscapeHtml(JSON.stringify(t, null, 2))}</pre>
+  `;
+}
+</script>
+
 </body>
 </html>
