@@ -78,13 +78,41 @@ jobs:
             -x "*.pyc" \
             -x "*.log"
 
-      - name: Configure SSH
+            - name: Configure SSH
         run: |
+          set -euo pipefail
+
           mkdir -p ~/.ssh
+
+          echo "Checking required SSH secrets..."
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "ERROR: VPS_HOST secret is empty"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.VPS_USER }}" ]; then
+            echo "ERROR: VPS_USER secret is empty"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "ERROR: VPS_SSH_KEY secret is empty"
+            exit 1
+          fi
+
+          echo "Decoding SSH private key..."
           printf '%s' "${{ secrets.VPS_SSH_KEY }}" | base64 -d > ~/.ssh/id_ed25519
+
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+          echo "Validating SSH private key..."
           ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
+
+          echo "Adding VPS host key..."
+          ssh-keyscan -T 20 -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+          echo "Testing SSH connection..."
+          ssh -o BatchMode=yes -o ConnectTimeout=20 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo SSH_OK"
       - name: Upload VPS deploy script
         run: |
           scp "server_scripts/deploy_ktrade_release.sh" \
