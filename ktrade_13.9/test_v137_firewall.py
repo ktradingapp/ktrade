@@ -90,7 +90,7 @@ def test_allow_comment_respected():
 def test_existing_checks_intact():
     rc, out = run_against({".env": "SECRET=abc\n"})
     check("forbidden .env still caught", rc == 1 and "Forbidden" in out)
-    rc, out = run_against({"cfg.txt": "OPENAI=sk-proj-ABCDEFGHIJKLMNOPQRSTUVWX\n"})
+    rc, out = run_against({"cfg.txt": "OPENAI=DUMMY_OPENAI_KEY_FOR_TESTS\n"})
     check("secret pattern still caught", rc == 1 and "OpenAI" in out)
 
 
