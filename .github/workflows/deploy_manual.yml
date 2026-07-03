@@ -1,0 +1,113 @@
+name: Deploy KTrade Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_folder:
+        description: "Folder to deploy, example: ktrade_13.14"
+        required: true
+        default: "ktrade_13.14"
+      release_version:
+        description: "Release version, example: v13.14"
+        required: true
+        default: "v13.14"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Validate inputs
+        run: |
+          DEPLOY_FOLDER="${{ github.event.inputs.deploy_folder }}"
+          VERSION="${{ github.event.inputs.release_version }}"
+
+          if [ ! -d "$DEPLOY_FOLDER" ]; then
+            echo "ERROR: deploy folder not found: $DEPLOY_FOLDER"
+            echo "Available folders:"
+            find . -maxdepth 1 -type d -name 'ktrade_*' -print
+            exit 1
+          fi
+
+          if [ ! -f "$DEPLOY_FOLDER/backend/ktrade_alpaca.py" ]; then
+            echo "ERROR: backend missing"
+            exit 1
+          fi
+
+          if [ ! -f "$DEPLOY_FOLDER/agent/ktrade_agent_v9.py" ]; then
+            echo "ERROR: agent missing"
+            exit 1
+          fi
+
+          if [ ! -f "$DEPLOY_FOLDER/frontend/KTrade_preview.html" ]; then
+            echo "ERROR: frontend missing"
+            exit 1
+          fi
+
+      - name: Build deploy zip
+        run: |
+          DEPLOY_FOLDER="${{ github.event.inputs.deploy_folder }}"
+          VERSION="${{ github.event.inputs.release_version }}"
+
+          cd "$DEPLOY_FOLDER"
+
+          zip -r "../Ktrade_${VERSION}_deploy.zip" . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x ".venv/*" \
+            -x "venv/*" \
+            -x "__pycache__/*" \
+            -x "*.pyc" \
+            -x "*.log" \
+            -x ".env" \
+            -x "data/ktrade_scan_latest.json" \
+            -x "data/ktrade_backtest_latest.json" \
+            -x "data/ktrade_intraday_backtest_latest.json" \
+            -x "data/ktrade_intraday_approved_params.json"
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+
+          echo "Checking SSH secrets..."
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then echo "ERROR: VPS_HOST empty"; exit 1; fi
+          if [ -z "${{ secrets.VPS_USER }}" ]; then echo "ERROR: VPS_USER empty"; exit 1; fi
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then echo "ERROR: VPS_SSH_KEY empty"; exit 1; fi
+
+          echo "Decoding key..."
+          printf '%s' "${{ secrets.VPS_SSH_KEY }}" | base64 -d > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          echo "Validating key..."
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
+
+          echo "Adding host..."
+          ssh-keyscan -T 20 -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+          echo "Testing SSH..."
+          ssh -o BatchMode=yes -o ConnectTimeout=20 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo SSH_OK"
+
+      - name: Upload VPS deploy script
+        run: |
+          scp "server_scripts/deploy_ktrade_release.sh" \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/deploy_ktrade_release.sh"
+
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "chmod +x /opt/deploy_ktrade_release.sh"
+
+      - name: Upload zip to VPS
+        run: |
+          VERSION="${{ github.event.inputs.release_version }}"
+          scp "Ktrade_${VERSION}_deploy.zip" \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/Ktrade_${VERSION}_deploy.zip"
+
+      - name: Deploy on VPS
+        run: |
+          VERSION="${{ github.event.inputs.release_version }}"
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "/opt/deploy_ktrade_release.sh ${VERSION} /root/Ktrade_${VERSION}_deploy.zip"
