@@ -8,19 +8,7 @@ on:
         required: true
         default: "ktrade_13.9"
       release_version:
-        description: "Release version, example: v13.9"
-        required: true
-        default: "v13.9"
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Validate inputs
+        description: "
         run: |
           DEPLOY_FOLDER="${{ github.event.inputs.deploy_folder }}"
           VERSION="${{ github.event.inputs.release_version }}"
@@ -76,9 +64,14 @@ jobs:
             -x "venv/*" \
             -x "__pycache__/*" \
             -x "*.pyc" \
-            -x "*.log"
+            -x "*.log" \
+            -x ".env" \
+            -x "data/ktrade_scan_latest.json" \
+            -x "data/ktrade_backtest_latest.json" \
+            -x "data/ktrade_intraday_backtest_latest.json" \
+            -x "data/ktrade_intraday_approved_params.json"
 
-            - name: Configure SSH
+      - name: Configure SSH
         run: |
           set -euo pipefail
 
@@ -113,6 +106,7 @@ jobs:
 
           echo "Testing SSH connection..."
           ssh -o BatchMode=yes -o ConnectTimeout=20 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo SSH_OK"
+
       - name: Upload VPS deploy script
         run: |
           scp "server_scripts/deploy_ktrade_release.sh" \
